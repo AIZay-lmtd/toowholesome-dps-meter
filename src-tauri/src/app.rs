@@ -220,6 +220,22 @@ async fn get_fight_history(app: tauri::AppHandle) -> Result<Vec<FightSummary>, S
     }).await
 }
 
+/// TooWholeDPS: whether the meter starts with Windows and waits for AION 2.
+#[tauri::command]
+async fn get_launch_with_game() -> bool {
+    tokio::task::spawn_blocking(crate::autostart::is_enabled).await.unwrap_or(false)
+}
+
+#[tauri::command]
+async fn set_launch_with_game(enabled: bool) -> Result<bool, String> {
+    tokio::task::spawn_blocking(move || {
+        crate::autostart::set_enabled(enabled)?;
+        Ok(crate::autostart::is_enabled())
+    })
+    .await
+    .map_err(|e| e.to_string())?
+}
+
 /// TooWholeDPS: every personal best, newest first.
 #[tauri::command]
 fn get_personal_bests(state: tauri::State<'_, AppState>) -> Vec<PersonalBest> {
@@ -2332,6 +2348,12 @@ pub fn run() {
     }
 
     let mut context = tauri::generate_context!();
+    // TooWholeDPS: started at sign-in to wait for the game; stay out of sight.
+    if crate::autostart::launched_in_background()
+        && let Some(main) = context.config_mut().app.windows.iter_mut().find(|w| w.label == "main")
+    {
+        main.visible = false;
+    }
     if platform::window_startup::loads_hidden()
         && let Some(main) = context.config_mut().app.windows.iter_mut().find(|w| w.label == "main")
     {
@@ -2339,6 +2361,20 @@ pub fn run() {
     }
 
     tauri::Builder::default()
+        // TooWholeDPS: one meter at a time. Opening it again (the shortcut,
+        // while a background copy waits for the game) shows the one running.
+        .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
+            if let Ok(mut watcher) = crate::autostart::WATCHER.lock() {
+                watcher.opened_by_player();
+            }
+            if let Some(window) = app.get_webview_window("main") {
+                let _ = window.unminimize();
+                let _ = window.show();
+                let _ = window.set_always_on_top(true);
+                let _ = window.set_focus();
+                let _ = window.emit("force-resize", ());
+            }
+        }))
         .append_invoke_initialization_script(format!(
             "window.__A2_WINDOW_STARTUP__ = {{loadsHidden:{},reusesSettings:{}}};",
             platform::window_startup::loads_hidden(),
@@ -2681,6 +2717,26 @@ pub fn run() {
                             let _ = handle.emit("ping-update", ping);
                         }
 
+                        // --- TooWholeDPS: started with Windows, wait for the game (every 2s) ---
+                        if tick_count % 4 == 0 && crate::autostart::launched_in_background() {
+                            let game = platform::window_detector::find_aion2_window();
+                            let action = crate::autostart::WATCHER.lock().ok().and_then(|mut w| w.check(game));
+                            if let (Some(action), Some(window)) = (action, handle.get_webview_window("main")) {
+                                match action {
+                                    crate::autostart::Action::Show => {
+                                        tracing::info!("AION 2 opened: showing the meter");
+                                        let _ = window.unminimize();
+                                        platform::window::show_on_top_without_focus(&window);
+                                        let _ = window.emit("force-resize", ());
+                                    }
+                                    crate::autostart::Action::Hide => {
+                                        tracing::info!("AION 2 closed: hiding the meter");
+                                        let _ = window.hide();
+                                    }
+                                }
+                            }
+                        }
+
                         // --- Auto-hide when AION2 loses focus (every tick) ---
                         let auto_hide = tick_count > 20
                             && state.settings.get("dpsMeter.autoHideMeter")
@@ -2885,6 +2941,8 @@ pub fn run() {
             get_fight_buffs,
             get_fight_history,
             get_personal_bests,
+            get_launch_with_game,
+            set_launch_with_game,
             backfill_personal_bests,
             clear_personal_bests,
             save_fight,

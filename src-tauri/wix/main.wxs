@@ -364,6 +364,21 @@
           <Custom Action="LaunchApplication" After="InstallFinalize">AUTOLAUNCHAPP AND NOT Installed</Custom>
         </InstallExecuteSequence>
 
+        <!-- TooWholeDPS: remove the "Start with AION 2" sign-in task (see
+             src/autostart.rs) on uninstall. Ignored when there is none. -->
+        <CustomAction
+            Id="DeleteTooWholeAutostartTask"
+            Return="ignore"
+            Directory="INSTALLDIR"
+            Execute="deferred"
+            Impersonate="no"
+            ExeCommand='"[SystemFolder]schtasks.exe" /Delete /TN "TooWholeDPS Meter" /F' />
+        <InstallExecuteSequence>
+            <Custom Action="DeleteTooWholeAutostartTask" Before="InstallFinalize">
+                (REMOVE = "ALL") AND NOT UPGRADINGPRODUCTCODE
+            </Custom>
+        </InstallExecuteSequence>
+
         <SetProperty Id="ARPINSTALLLOCATION" Value="[INSTALLDIR]" After="CostFinalize"/>
     </Product>
 </Wix>

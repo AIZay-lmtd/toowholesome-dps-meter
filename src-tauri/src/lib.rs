@@ -43,6 +43,8 @@ mod npcap_setup;
 
 #[cfg(feature = "desktop")]
 mod app;
+#[cfg(feature = "desktop")]
+mod autostart;
 
 #[cfg(feature = "desktop")]
 mod atomic_file;

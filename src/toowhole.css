@@ -440,3 +440,7 @@
 .historyUploadBtn {
   display: none !important;
 }
+
+/* "Start automatically with AION 2" status line (Settings). */
+.launchWithGameStatus { margin: -2px 0 6px; font-size: 11px; }
+.launchWithGameStatus.isError { color: var(--error-fill, #e06b6b); }

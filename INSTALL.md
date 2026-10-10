@@ -39,7 +39,16 @@ Raw packet capture needs administrator rights.
 
 From now on, double-clicking the shortcut starts it elevated. Accept the UAC prompt.
 
-## 5. First launch
+## 5. Where to launch it
+
+After installing, open it from:
+- **Start menu:** press the Windows key, type **TooWhole**, and click **TooWholeDPS Meter**.
+- **Desktop:** the **TooWholeDPS Meter** shortcut, if you kept it ticked in the installer.
+- **The program file itself:** `C:\Program Files\TooWholeDPS Meter\TooWholeDPS-Meter.exe`.
+
+To skip this every time, turn on **Start automatically with AION 2** (step 7).
+
+## 6. First launch
 
 1. Start **AION 2** and log into your character. You can start the meter before or after the game.
 2. Start **TooWholeDPS Meter**. A small gold-framed overlay appears on top of the game. Drag it by the title bar to wherever you want it.
@@ -47,7 +56,22 @@ From now on, double-clicking the shortcut starts it elevated. Accept the UAC pro
 4. Open **Settings** (the gear icon) and check that **your character name** is filled in. It's normally detected from the game window. If it isn't, type it in. The meter needs it to know which row is yours.
 5. **AION 2 must run in Windowed or Borderless (windowed fullscreen) mode.** Exclusive fullscreen draws over every overlay. Change it in the game's graphics options.
 
-## 6. Using it
+## 7. Start automatically with AION 2 (optional)
+
+1. Make sure the meter is running **as administrator** (step 4).
+2. Open **Settings** (gear icon) and turn on **Start automatically with AION 2**.
+
+From then on:
+- The meter starts hidden when you sign in to Windows, with no UAC prompt.
+- The overlay appears by itself when AION 2 opens.
+- It hides again about 10 seconds after you close the game, and stays ready, using almost no CPU.
+- If you open the meter from the shortcut while it's waiting, it simply shows the copy that's already running.
+
+To stop this, turn the setting off. Uninstalling the meter also removes it.
+
+> Behind the scenes, this is a Windows Task Scheduler task named **"TooWholeDPS Meter"** that runs at sign-in. It needs administrator rights to create because it lets the meter capture packets without asking each time.
+
+## 8. Using it
 
 | Header button | What it does |
 |---|---|
@@ -69,6 +93,7 @@ From now on, double-clicking the shortcut starts it elevated. Accept the UAC pro
 
 | Problem | Fix |
 |---|---|
+| Turning on "Start automatically with AION 2" says "run as administrator" | Close the meter, start it as administrator (step 4), then try again. |
 | Stuck on "Detecting AION2 connection…" | Make sure the meter runs **as administrator** and Npcap is installed **with WinPcap-compatible mode**. If you use a VPN or ping reducer, the meter should pick the right adapter by itself. Restart the meter after you change any of these. |
 | Your row isn't highlighted, or no PB strip appears | Check your character name in Settings, then hit something so the meter can identify you. |
 | Overlay not visible over the game | Switch AION 2 to Windowed or Borderless mode. |
