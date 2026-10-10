@@ -1,4 +1,4 @@
-# Installing TooWholeDPS Meter
+# Installing TooWholesome DPS Meter
 
 These steps work on Windows 10 and 11 (64-bit). They take about five minutes.
 
@@ -21,20 +21,20 @@ Windows 11 already has it. On Windows 10:
 
 ## 3. Install the meter
 
-1. Get the installer file, **`TooWholeDPS Meter_1.0.0_x64_en-US.msi`**.
+1. Download the latest **`TooWholesome-DPS-Meter_<version>_x64_en-US.msi`** from the **[Releases page](https://github.com/AIZay-lmtd/toowholesome-dps-meter/releases/latest)**.
    - If you built it yourself, it's in `src-tauri\target\release\bundle\msi\`.
-   - Otherwise, use the copy you were given.
+eleaseundle\msi\`.
 2. Double-click the `.msi`.
 3. **Windows SmartScreen** may say "Windows protected your PC" because the installer isn't code-signed. Click **More info → Run anyway**.
-4. Follow the installer. It adds a **TooWholeDPS Meter** shortcut to the Start menu (and to the desktop if you leave that ticked).
+4. Follow the installer. It adds a **TooWholesome DPS Meter** shortcut to the Start menu (and to the desktop if you leave that ticked).
 
-TooWholeDPS installs separately from A2Tools DPS Meter, so both can be installed at the same time. Close one before you open the other, because both capture the same traffic.
+TooWholesome DPS installs separately from A2Tools DPS Meter, so both can be installed at the same time. Close one before you open the other, because both capture the same traffic.
 
 ## 4. Run it as administrator
 
 Raw packet capture needs administrator rights.
 
-1. Right-click the **TooWholeDPS Meter** shortcut → **Properties → Compatibility**.
+1. Right-click the **TooWholesome DPS Meter** shortcut → **Properties → Compatibility**.
 2. Tick **"Run this program as an administrator"** → **OK**.
 
 From now on, double-clicking the shortcut starts it elevated. Accept the UAC prompt.
@@ -42,16 +42,16 @@ From now on, double-clicking the shortcut starts it elevated. Accept the UAC pro
 ## 5. Where to launch it
 
 After installing, open it from:
-- **Start menu:** press the Windows key, type **TooWhole**, and click **TooWholeDPS Meter**.
-- **Desktop:** the **TooWholeDPS Meter** shortcut, if you kept it ticked in the installer.
-- **The program file itself:** `C:\Program Files\TooWholeDPS Meter\TooWholeDPS-Meter.exe`.
+- **Start menu:** press the Windows key, type **TooWholesome**, and click **TooWholesome DPS Meter**.
+- **Desktop:** the **TooWholesome DPS Meter** shortcut, if you kept it ticked in the installer.
+- **The program file itself:** `C:\Program Files\TooWholesome DPS Meter\TooWholesome-DPS-Meter.exe`.
 
 To skip this every time, turn on **Start automatically with AION 2** (step 7).
 
 ## 6. First launch
 
 1. Start **AION 2** and log into your character. You can start the meter before or after the game.
-2. Start **TooWholeDPS Meter**. A small gold-framed overlay appears on top of the game. Drag it by the title bar to wherever you want it.
+2. Start **TooWholesome DPS Meter**. A small gold-framed overlay appears on top of the game. Drag it by the title bar to wherever you want it.
 3. The title reads "Detecting AION2 connection..." until it sees game traffic. Attack anything and it locks on.
 4. Open **Settings** (the gear icon) and check that **your character name** is filled in. It's normally detected from the game window. If it isn't, type it in. The meter needs it to know which row is yours.
 5. **AION 2 must run in Windowed or Borderless (windowed fullscreen) mode.** Exclusive fullscreen draws over every overlay. Change it in the game's graphics options.
@@ -69,7 +69,7 @@ From then on:
 
 To stop this, turn the setting off. Uninstalling the meter also removes it.
 
-> Behind the scenes, this is a Windows Task Scheduler task named **"TooWholeDPS Meter"** that runs at sign-in. It needs administrator rights to create because it lets the meter capture packets without asking each time.
+> Behind the scenes, this is a Windows Task Scheduler task named **"TooWholesome DPS Meter"** that runs at sign-in. It needs administrator rights to create because it lets the meter capture packets without asking each time.
 
 ## 8. Using it
 
@@ -87,7 +87,7 @@ To stop this, turn the setting off. Uninstalling the meter also removes it.
   - The next time you fight that boss, the gold **PB** strip shows your best and a live ▲ ahead / ▼ behind comparison.
   - Beating your best shows a "New Personal Best!" banner about 10 seconds after the kill.
   - Wipes don't count, only kills.
-- **Theme:** TooWhole (Aion Gold) is the default. Every original theme is still available under Settings → Theme.
+- **Theme:** TooWholesome (Aion Gold) is the default. Every original theme is still available under Settings → Theme.
 
 ## Troubleshooting
 
@@ -102,11 +102,11 @@ To stop this, turn the setting off. Uninstalling the meter also removes it.
 
 ## Uninstall
 
-Go to **Settings → Apps → Installed apps → TooWholeDPS Meter → Uninstall**. Your fight history and personal bests stay in `%APPDATA%\com.toowhole.dps-meter` in case you reinstall. Delete that folder to remove them too.
+Go to **Settings → Apps → Installed apps → TooWholesome DPS Meter → Uninstall**. Your fight history and personal bests stay in `%APPDATA%\com.toowhole.dps-meter` in case you reinstall. Delete that folder to remove them too.
 
 ## Sharing with friends
 
-Send them the `.msi` file and this guide. TooWholeDPS is GPL-3.0 software, so when you share the installer you must also make its source available, for example by publishing this folder to a GitHub repository and sending them the link.
+Send them the `.msi` file and this guide. TooWholesome DPS is GPL-3.0 software, so when you share the installer you must also make its source available, for example by publishing this folder to a GitHub repository and sending them the link.
 
 ---
 

@@ -1,6 +1,6 @@
 {
   "header": {
-    "title": "TooWholeDPS Meter",
+    "title": "TooWholesome DPS Meter",
     "display": {
       "dps": "DPS",
       "total": "УРН",
@@ -471,7 +471,7 @@
     "close": "Закрыть"
   },
   "npcapPrompt": {
-    "ask": "TooWholeDPS Meter нужен Npcap, чтобы читать сетевой трафик игры, но Npcap не установлен или не работает.\n\nУстановить сейчас? Программа скачает установщик Npcap с npcap.com и откроет его. Когда Npcap будет установлен, программа сама начнёт захват.\n\nВыберите «Нет», чтобы установить его самостоятельно с https://npcap.com/#download",
+    "ask": "TooWholesome DPS Meter нужен Npcap, чтобы читать сетевой трафик игры, но Npcap не установлен или не работает.\n\nУстановить сейчас? Программа скачает установщик Npcap с npcap.com и откроет его. Когда Npcap будет установлен, программа сама начнёт захват.\n\nВыберите «Нет», чтобы установить его самостоятельно с https://npcap.com/#download",
     "downloadFailed": "Не удалось скачать установщик Npcap ({error}).\n\nУстановите его самостоятельно с https://npcap.com/#download, затем снова откройте программу.",
     "stillMissing": "Npcap всё ещё не работает. Если установщик закрыли до завершения, установите Npcap с https://npcap.com/#download, затем снова откройте программу."
   }

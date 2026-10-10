@@ -1,4 +1,4 @@
-// TooWholeDPS: personal bests.
+// TooWholesome DPS: personal bests.
 //
 // The backend keeps the local player's best DPS per boss, tier and class
 // (src-tauri/src/history/personal_bests.rs) and emits "personal-best" when a

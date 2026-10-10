@@ -1,12 +1,12 @@
-# TooWholeDPS Meter
+# TooWholesome DPS Meter
 
 A real-time DPS meter overlay for **AION 2**, styled in Elyos gold and Abyss indigo, with **personal-best tracking**.
 
-TooWholeDPS Meter is a fork of [A2Tools DPS Meter](https://github.com/taengu/A2Tools-DPS-Meter) by taengu and contributors. The packet parser, combat engine and most features come from that project. See [README_UPSTREAM.md](README_UPSTREAM.md) for its full feature list and FAQ.
+TooWholesome DPS Meter is a fork of [A2Tools DPS Meter](https://github.com/taengu/A2Tools-DPS-Meter) by taengu and contributors. The packet parser, combat engine and most features come from that project. See [README_UPSTREAM.md](README_UPSTREAM.md) for its full feature list and FAQ.
 
-## What's different in TooWholeDPS
+## What's different in TooWholesome DPS
 
-- **TooWhole theme (default).** A gold-framed overlay with corner filigree, Cinzel serif titles, gilded bars for your own row and azure bars for your party. All the original themes are still in Settings → Theme.
+- **TooWholesome theme (default).** A gold-framed overlay with corner filigree, Cinzel serif titles, gilded bars for your own row and azure bars for your party. All the original themes are still in Settings → Theme.
 - **Personal bests.**
   - The meter remembers your best DPS for every boss, broken down by instance tier and by class.
   - While you fight a boss you have a best on, a gold **PB** strip under the title shows your best and how far ahead (▲ green) or behind (▼ red) you are right now.
@@ -20,13 +20,13 @@ TooWholeDPS Meter is a fork of [A2Tools DPS Meter](https://github.com/taengu/A2T
   - Turn it on in Settings.
   - The meter then starts hidden when you sign in to Windows, as administrator and without a UAC prompt.
   - The overlay appears when the AION 2 window opens and hides about 10 seconds after the game closes.
-  - It uses a Windows Task Scheduler task named "TooWholeDPS Meter", which is removed when you turn the setting off or uninstall.
+  - It uses a Windows Task Scheduler task named "TooWholesome DPS Meter", which is removed when you turn the setting off or uninstall.
   - Opening the meter a second time brings up the copy that's already running instead of starting another one.
 - **Self-contained.** Online log uploads, a2tools.app sign-in, "send logs to dev" and the upstream donation links are switched off. The meter only talks to npcap.com (if you ask it to install Npcap) and the game's own CDN for skill icons.
 
 ## Install
 
-See **[INSTALL.md](INSTALL.md)** for step-by-step instructions.
+**[Download the latest installer](https://github.com/AIZay-lmtd/toowholesome-dps-meter/releases/latest)**, then follow **[INSTALL.md](INSTALL.md)** step by step.
 
 ## Build from source
 
@@ -48,7 +48,7 @@ git fetch upstream
 git merge upstream/main
 ```
 
-TooWholeDPS keeps its own changes in a few places to keep merges easy:
+TooWholesome DPS keeps its own changes in a few places to keep merges easy:
 - `src/toowhole.css`
 - `public/src/js/personalBests.js`
 - `src-tauri/src/history/personal_bests.rs`
@@ -61,4 +61,4 @@ GPL-3.0, the same as the upstream project. See [LICENSE](LICENSE). If you share 
 - Original work © taengu and A2Tools DPS Meter contributors. Some parser fixes come from [Daevalog](https://github.com/Seralth/Daevalog) by Seralth.
 - Cinzel font: SIL Open Font License 1.1 (`public/vendor/fonts/cinzel/LICENSE`). Other bundled fonts are listed in [README_UPSTREAM.md](README_UPSTREAM.md#fonts).
 
-TooWholeDPS Meter is not affiliated with NCSoft or with A2Tools. AION 2 is a trademark of NCSoft.
+TooWholesome DPS Meter is not affiliated with NCSoft or with A2Tools. AION 2 is a trademark of NCSoft.

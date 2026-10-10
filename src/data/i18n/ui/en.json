@@ -1,6 +1,6 @@
 {
   "header": {
-    "title": "TooWholeDPS Meter",
+    "title": "TooWholesome DPS Meter",
     "display": {
       "dps": "DPS",
       "total": "DMG",
@@ -478,7 +478,7 @@
     "close": "Close"
   },
   "npcapPrompt": {
-    "ask": "TooWholeDPS Meter needs Npcap to read the game's network traffic, and Npcap is missing or not working.\n\nInstall it now? The meter downloads Npcap's installer from npcap.com and opens it. Once Npcap is installed, the meter starts capturing by itself.\n\nChoose No to install it yourself from https://npcap.com/#download",
+    "ask": "TooWholesome DPS Meter needs Npcap to read the game's network traffic, and Npcap is missing or not working.\n\nInstall it now? The meter downloads Npcap's installer from npcap.com and opens it. Once Npcap is installed, the meter starts capturing by itself.\n\nChoose No to install it yourself from https://npcap.com/#download",
     "downloadFailed": "Npcap's installer could not be downloaded ({error}).\n\nInstall it yourself from https://npcap.com/#download, then open the meter again.",
     "stillMissing": "Npcap is still not working. If its installer was closed before it finished, install Npcap from https://npcap.com/#download, then open the meter again."
   }

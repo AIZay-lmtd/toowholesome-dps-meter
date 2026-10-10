@@ -3114,7 +3114,7 @@ class DpsApp {
     ];
 
     const themeOptions = [
-      { value: "toowhole", label: this.i18n?.t("settings.theme.options.toowhole", "TooWhole (Aion Gold)") },
+      { value: "toowhole", label: this.i18n?.t("settings.theme.options.toowhole", "TooWholesome (Aion Gold)") },
       { value: "aion2", label: this.i18n?.t("settings.theme.options.aion2", "AION2") },
       { value: "asmodian", label: this.i18n?.t("settings.theme.options.asmodian", "Asmodian") },
       { value: "cogni", label: this.i18n?.t("settings.theme.options.cogni", "Cogni") },
@@ -5196,7 +5196,7 @@ class DpsApp {
       }
       return this.i18n?.t("target.train", "Training Scarecrow") ?? "Training Scarecrow";
     }
-    return this.i18n?.t("header.title", "TooWholeDPS Meter") ?? "TooWholeDPS Meter";
+    return this.i18n?.t("header.title", "TooWholesome DPS Meter") ?? "TooWholesome DPS Meter";
   }
 
   getTargetLabel({ targetId = 0, targetName = "", targetMode = "", dungeonId = 0 } = {}) {

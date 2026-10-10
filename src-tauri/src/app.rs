@@ -60,7 +60,7 @@ pub struct AppState {
     pub ping_tracker: Arc<PingTracker>,
     pub port_detector: Arc<CombatPortDetector>,
     pub fight_history: FightHistoryManager,
-    /// TooWholeDPS: the local player's best DPS per boss.
+    /// TooWholesome DPS: the local player's best DPS per boss.
     pub personal_bests: PersonalBestStore,
     /// Order fight snapshots and their writes together. Settings never take
     /// this lock; the calculator guard is released before disk work.
@@ -220,7 +220,7 @@ async fn get_fight_history(app: tauri::AppHandle) -> Result<Vec<FightSummary>, S
     }).await
 }
 
-/// TooWholeDPS: whether the meter starts with Windows and waits for AION 2.
+/// TooWholesome DPS: whether the meter starts with Windows and waits for AION 2.
 #[tauri::command]
 async fn get_launch_with_game() -> bool {
     tokio::task::spawn_blocking(crate::autostart::is_enabled).await.unwrap_or(false)
@@ -236,13 +236,13 @@ async fn set_launch_with_game(enabled: bool) -> Result<bool, String> {
     .map_err(|e| e.to_string())?
 }
 
-/// TooWholeDPS: every personal best, newest first.
+/// TooWholesome DPS: every personal best, newest first.
 #[tauri::command]
 fn get_personal_bests(state: tauri::State<'_, AppState>) -> Vec<PersonalBest> {
     state.personal_bests.list()
 }
 
-/// TooWholeDPS: build personal bests from the fights already in History, for
+/// TooWholesome DPS: build personal bests from the fights already in History, for
 /// `character` (the local player's name; the only unmasked name in a record).
 /// Returns how many bosses have a best.
 #[tauri::command]
@@ -326,11 +326,11 @@ async fn upload_fight(
     share::upload(&state.http, &state.app_data_dir, &record, &state.settings).await
 }
 
-/// TooWholeDPS: uploads, sign-in and the supporter roster belong to the
+/// TooWholesome DPS: uploads, sign-in and the supporter roster belong to the
 /// a2tools.app service, which third-party meters may only use with its
 /// maintainers' permission (see README). Off in this build.
 const UPSTREAM_SERVICES: bool = false;
-const UPSTREAM_SERVICES_OFF: &str = "Online log uploads are not available in TooWholeDPS Meter.";
+const UPSTREAM_SERVICES_OFF: &str = "Online log uploads are not available in TooWholesome DPS Meter.";
 
 /// Upload a finished fight in the background, and tell every window.
 ///
@@ -979,7 +979,7 @@ async fn show_update_window(
     let msg = format!("A new update is available!\n\nCurrent: {}\nLatest: {}\n\nDownload and install now?", current, latest);
 
     let accepted = tokio::task::spawn_blocking(move || {
-        platform::dialog::ask_yes_no("TooWholeDPS - Update Available", &msg)
+        platform::dialog::ask_yes_no("TooWholesome DPS - Update Available", &msg)
     }).await.unwrap_or(false);
 
     if accepted {
@@ -992,7 +992,7 @@ async fn show_update_window(
                 // Show error dialog
                 let _ = tokio::task::spawn_blocking(move || {
                     platform::dialog::show_error(
-                        "TooWholeDPS - Update Error",
+                        "TooWholesome DPS - Update Error",
                         &format!("Download failed: {}\n\nPlease download manually.", e),
                     );
                 }).await;
@@ -1361,7 +1361,7 @@ fn open_details_on_monitor_inner(
         tauri::WebviewUrl::App("index.html".into()),
     )
     .initialization_script("window.__A2_VIEW__ = 'details';")
-    .title("TooWholeDPS Meter — Details")
+    .title("TooWholesome DPS Meter — Details")
     .decorations(false)
     .transparent(false)
     // Intentional: the point of this window is to stay readable on a second
@@ -1591,7 +1591,7 @@ fn build_settings_window(app: &tauri::AppHandle) -> Result<(), String> {
     // Injected before any page script. WebviewUrl::App is a path, so a ?query
     // gets percent-encoded — this is the one channel that is reliable.
     .initialization_script(SETTINGS_WINDOW_SCRIPT)
-    .title("TooWholeDPS Meter — Settings")
+    .title("TooWholesome DPS Meter — Settings")
     .decorations(false)
     .transparent(false)
     // Matches Details: the overlay itself is always-on-top, so a settings window
@@ -1837,7 +1837,7 @@ fn open_fight_window(app: &tauri::AppHandle, label: &str) -> Result<(), String> 
         tauri::WebviewUrl::App("index.html".into()),
     )
     .initialization_script("window.__A2_VIEW__ = 'details';")
-    .title("TooWholeDPS Meter — Fight")
+    .title("TooWholesome DPS Meter — Fight")
     .decorations(false)
     .transparent(false)
     .always_on_top(true)
@@ -1872,7 +1872,7 @@ fn open_history_window_inner(app: &tauri::AppHandle) -> Result<(), String> {
         tauri::WebviewUrl::App("index.html".into()),
     )
     .initialization_script("window.__A2_VIEW__ = 'history';")
-    .title("TooWholeDPS Meter — Battle History")
+    .title("TooWholesome DPS Meter — Battle History")
     .decorations(false)
     .transparent(false)
     .always_on_top(true)
@@ -1909,7 +1909,7 @@ fn open_details_windowed(app: &tauri::AppHandle) -> Result<(), String> {
         tauri::WebviewUrl::App("index.html".into()),
     )
     .initialization_script("window.__A2_VIEW__ = 'details';")
-    .title("TooWholeDPS Meter — Details")
+    .title("TooWholesome DPS Meter — Details")
     .decorations(false)
     .transparent(false)
     .always_on_top(true)
@@ -2348,7 +2348,7 @@ pub fn run() {
     }
 
     let mut context = tauri::generate_context!();
-    // TooWholeDPS: started at sign-in to wait for the game; stay out of sight.
+    // TooWholesome DPS: started at sign-in to wait for the game; stay out of sight.
     if crate::autostart::launched_in_background()
         && let Some(main) = context.config_mut().app.windows.iter_mut().find(|w| w.label == "main")
     {
@@ -2361,7 +2361,7 @@ pub fn run() {
     }
 
     tauri::Builder::default()
-        // TooWholeDPS: one meter at a time. Opening it again (the shortcut,
+        // TooWholesome DPS: one meter at a time. Opening it again (the shortcut,
         // while a background copy waits for the game) shows the one running.
         .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
             if let Ok(mut watcher) = crate::autostart::WATCHER.lock() {
@@ -2494,7 +2494,7 @@ pub fn run() {
                 app_data_dir: app_data_dir.clone(),
                 i18n_data_dir: found_data_dir.clone(),
                 http: reqwest::Client::builder()
-                    .user_agent(concat!("TooWholeDPS-Meter/", env!("CARGO_PKG_VERSION")))
+                    .user_agent(concat!("TooWholesome-DPS-Meter/", env!("CARGO_PKG_VERSION")))
                     .connect_timeout(Duration::from_secs(10))
                     .timeout(Duration::from_secs(30))
                     .build()
@@ -2556,6 +2556,9 @@ pub fn run() {
                     }
                 }
             }
+
+            // TooWholesome DPS: carry a start-with-AION-2 task over from an older name.
+            std::thread::spawn(crate::autostart::migrate_legacy);
 
             // Restore saved window position and ensure always-on-top
             if let Some(window) = app.get_webview_window("main") {
@@ -2717,7 +2720,7 @@ pub fn run() {
                             let _ = handle.emit("ping-update", ping);
                         }
 
-                        // --- TooWholeDPS: started with Windows, wait for the game (every 2s) ---
+                        // --- TooWholesome DPS: started with Windows, wait for the game (every 2s) ---
                         if tick_count % 4 == 0 && crate::autostart::launched_in_background() {
                             let game = platform::window_detector::find_aion2_window();
                             let action = crate::autostart::WATCHER.lock().ok().and_then(|mut w| w.check(game));

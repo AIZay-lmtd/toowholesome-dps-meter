@@ -1,4 +1,4 @@
-// TooWholeDPS: the "Start automatically with AION 2" toggle in Settings.
+// TooWholesome DPS: the "Start automatically with AION 2" toggle in Settings.
 // The backend registers or removes a sign-in task (src-tauri/src/autostart.rs);
 // the toggle always shows what Task Scheduler actually has.
 (() => {

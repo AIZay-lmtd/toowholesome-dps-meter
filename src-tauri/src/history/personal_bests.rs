@@ -1,4 +1,4 @@
-//! TooWholeDPS: the local player's best DPS against each boss.
+//! TooWholesome DPS: the local player's best DPS against each boss.
 //!
 //! One record per boss, instance tier and class (`mob_code:dungeon_id:job`),
 //! kept in its own `personal_bests.json` so the History cap of 500 fights can

@@ -1,9 +1,9 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "TooWholeDPS Meter",
-  "version": "1.0.0",
+  "productName": "TooWholesome DPS Meter",
+  "version": "1.0.1",
   "identifier": "com.toowhole.dps-meter",
-  "mainBinaryName": "TooWholeDPS-Meter",
+  "mainBinaryName": "TooWholesome-DPS-Meter",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",
@@ -14,7 +14,7 @@
     "withGlobalTauri": true,
     "windows": [
       {
-        "title": "TooWholeDPS Meter",
+        "title": "TooWholesome DPS Meter",
         "width": 400,
         "height": 300,
         "decorations": false,
@@ -88,7 +88,7 @@
         "postInstallScript": "../packaging/linux/postinst.sh"
       }
     },
-    "publisher": "TooWhole",
-    "copyright": "TooWholeDPS Meter is a GPL-3.0 fork of A2Tools DPS Meter (github.com/taengu/A2Tools-DPS-Meter)"
+    "publisher": "TooWholesome",
+    "copyright": "TooWholesome DPS Meter is a GPL-3.0 fork of A2Tools DPS Meter (github.com/taengu/A2Tools-DPS-Meter)"
   }
 }

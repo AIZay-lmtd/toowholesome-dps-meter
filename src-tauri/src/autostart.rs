@@ -1,4 +1,4 @@
-//! TooWholeDPS: "Start with AION 2".
+//! TooWholesome DPS: "Start with AION 2".
 //!
 //! Windows cannot start a program when another one starts without something
 //! already running to notice, so this registers a Task Scheduler task that
@@ -11,7 +11,10 @@
 use std::sync::Mutex;
 
 pub const BACKGROUND_ARG: &str = "--background";
-pub const TASK_NAME: &str = "TooWholeDPS Meter";
+pub const TASK_NAME: &str = "TooWholesome DPS Meter";
+/// Names the task had in earlier versions. Their command points at the old
+/// install folder, so `migrate_legacy` re-registers them under `TASK_NAME`.
+pub const LEGACY_TASK_NAMES: &[&str] = &["TooWholeDPS Meter"];
 
 /// Game gone for this many checks (one every 2 s) before the overlay hides:
 /// a client restart or a crash-and-relaunch should not flicker it.
@@ -85,7 +88,7 @@ pub fn task_xml(exe: &str, user: &str) -> String {
         r#"<?xml version="1.0" encoding="UTF-16"?>
 <Task version="1.2" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
   <RegistrationInfo>
-    <Description>Starts TooWholeDPS Meter hidden at sign-in. The overlay appears when AION 2 opens. Turn off in the meter's Settings.</Description>
+    <Description>Starts TooWholesome DPS Meter hidden at sign-in. The overlay appears when AION 2 opens. Turn off in the meter's Settings.</Description>
   </RegistrationInfo>
   <Triggers>
     <LogonTrigger>
@@ -124,7 +127,7 @@ mod imp {
     use std::os::windows::process::CommandExt;
     use std::process::{Command, Output};
 
-    use super::{task_xml, TASK_NAME};
+    use super::{task_xml, LEGACY_TASK_NAMES, TASK_NAME};
 
     const CREATE_NO_WINDOW: u32 = 0x0800_0000;
 
@@ -139,18 +142,45 @@ mod imp {
     fn failure(output: &Output) -> String {
         let text = String::from_utf8_lossy(&output.stderr);
         if text.to_lowercase().contains("access is denied") {
-            "Windows refused: run TooWholeDPS Meter as administrator, then try again.".into()
+            "Windows refused: run TooWholesome DPS Meter as administrator, then try again.".into()
         } else {
             format!("Task Scheduler said: {}", text.trim())
         }
     }
 
+    fn exists(name: &str) -> bool {
+        schtasks(&["/Query", "/TN", name]).is_ok_and(|o| o.status.success())
+    }
+
     pub fn is_enabled() -> bool {
-        schtasks(&["/Query", "/TN", TASK_NAME]).is_ok_and(|o| o.status.success())
+        exists(TASK_NAME)
+    }
+
+    /// A task from before the rename: register it again under the current
+    /// name and this exe, then drop the old one. Quietly does nothing when
+    /// there is none, or when not elevated (it is tried again next start).
+    pub fn migrate_legacy() {
+        for &old in LEGACY_TASK_NAMES {
+            if !exists(old) {
+                continue;
+            }
+            match set_enabled(true) {
+                Ok(()) => {
+                    let _ = schtasks(&["/Delete", "/TN", old, "/F"]);
+                    tracing::info!("Moved the start-with-AION-2 task from {old:?} to {TASK_NAME:?}");
+                }
+                Err(e) => tracing::warn!("Could not move the start-with-AION-2 task {old:?}: {e}"),
+            }
+        }
     }
 
     pub fn set_enabled(enabled: bool) -> Result<(), String> {
         if !enabled {
+            for &old in LEGACY_TASK_NAMES {
+                if exists(old) {
+                    let _ = schtasks(&["/Delete", "/TN", old, "/F"]);
+                }
+            }
             if !is_enabled() {
                 return Ok(());
             }
@@ -186,9 +216,11 @@ mod imp {
     pub fn set_enabled(_enabled: bool) -> Result<(), String> {
         Err("Starting with AION 2 is only available on Windows.".into())
     }
+
+    pub fn migrate_legacy() {}
 }
 
-pub use imp::{is_enabled, set_enabled};
+pub use imp::{is_enabled, migrate_legacy, set_enabled};
 
 #[cfg(test)]
 mod tests {
@@ -235,8 +267,8 @@ mod tests {
 
     #[test]
     fn the_task_runs_this_exe_in_background_mode() {
-        let xml = task_xml(r"C:\Program Files\TooWholeDPS Meter\TooWholeDPS-Meter.exe", r"PC\Me & You");
-        assert!(xml.contains(r"<Command>C:\Program Files\TooWholeDPS Meter\TooWholeDPS-Meter.exe</Command>"));
+        let xml = task_xml(r"C:\Program Files\TooWholesome DPS Meter\TooWholesome-DPS-Meter.exe", r"PC\Me & You");
+        assert!(xml.contains(r"<Command>C:\Program Files\TooWholesome DPS Meter\TooWholesome-DPS-Meter.exe</Command>"));
         assert!(xml.contains("<Arguments>--background</Arguments>"));
         assert!(xml.contains(r"<UserId>PC\Me &amp; You</UserId>"));
         assert!(xml.contains("<RunLevel>HighestAvailable</RunLevel>"));

@@ -38,10 +38,10 @@ fn texts(data_dir: Option<&Path>, lang: &str) -> Texts {
             .unwrap_or_else(|| fallback.to_string())
     };
     Texts {
-        title: "TooWholeDPS Meter".into(),
+        title: "TooWholesome DPS Meter".into(),
         ask: text(
             "ask",
-            "TooWholeDPS Meter needs Npcap to read the game's network traffic, and Npcap is missing or not working.\n\n\
+            "TooWholesome DPS Meter needs Npcap to read the game's network traffic, and Npcap is missing or not working.\n\n\
              Install it now? The meter downloads Npcap's installer from npcap.com and opens it. Once Npcap is \
              installed, the meter starts capturing by itself.\n\n\
              Choose No to install it yourself from https://npcap.com/#download",

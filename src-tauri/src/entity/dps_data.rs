@@ -31,7 +31,7 @@ pub struct DpsData {
     /// Instance id from the party roster (0 = not in a party instance). The
     /// frontend maps it to a dungeon name + difficulty.
     pub dungeon_id: i32,
-    /// TooWholeDPS: the current target's mob code (0 = none/unknown) and the
+    /// TooWholesome DPS: the current target's mob code (0 = none/unknown) and the
     /// instance its fights are saved under, which together key a personal best.
     #[serde(default)]
     pub target_mob_code: i32,
