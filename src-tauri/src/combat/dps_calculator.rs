@@ -235,6 +235,18 @@ impl DpsCalculator {
                 self.npc_lookup.is_boss(code) && !self.npc_lookup.is_training_dummy(code)
             });
         dps_data.target_is_boss = target_is_boss;
+        let target_mob_code = if self.current_target != 0 {
+            self.data_storage.mob_code(self.current_target).unwrap_or(0)
+        } else {
+            0
+        };
+        let target_pb_dungeon_id = if target_mob_code != 0 {
+            fight_dungeon(&self.npc_lookup, target_mob_code, dps_data.dungeon_id)
+        } else {
+            0
+        };
+        dps_data.target_mob_code = target_mob_code;
+        dps_data.target_pb_dungeon_id = target_pb_dungeon_id;
 
         // Collect actors from selected targets
         let mut combined_actors: HashMap<i32, i64> = HashMap::new();
@@ -276,6 +288,8 @@ impl DpsCalculator {
                 snapshot.target_current_hp = target_current_hp;
                 snapshot.target_is_boss = target_is_boss;
                 snapshot.dungeon_id = dps_data.dungeon_id;
+                snapshot.target_mob_code = target_mob_code;
+                snapshot.target_pb_dungeon_id = target_pb_dungeon_id;
                 let mut snap = snapshot.clone();
                 self.finalize_rows(&mut snap);
                 return snap;

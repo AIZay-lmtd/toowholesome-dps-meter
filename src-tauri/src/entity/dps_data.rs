@@ -31,6 +31,12 @@ pub struct DpsData {
     /// Instance id from the party roster (0 = not in a party instance). The
     /// frontend maps it to a dungeon name + difficulty.
     pub dungeon_id: i32,
+    /// TooWholeDPS: the current target's mob code (0 = none/unknown) and the
+    /// instance its fights are saved under, which together key a personal best.
+    #[serde(default)]
+    pub target_mob_code: i32,
+    #[serde(default)]
+    pub target_pb_dungeon_id: i32,
 }
 
 impl DpsData {
@@ -48,6 +54,8 @@ impl DpsData {
             target_current_hp: -1,
             target_is_boss: false,
             dungeon_id: 0,
+            target_mob_code: 0,
+            target_pb_dungeon_id: 0,
         }
     }
 }

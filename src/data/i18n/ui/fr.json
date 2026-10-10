@@ -1,6 +1,6 @@
 {
   "header": {
-    "title": "A2Tools DPS Meter",
+    "title": "TooWholeDPS Meter",
     "display": {
       "dps": "DPS",
       "total": "DGT",
@@ -338,7 +338,7 @@
     "showSupporterColors": "Afficher les couleurs des soutiens",
     "showSupporterColorsHint": "Le nom des soutiens s'affiche en doré. Purement esthétique — aucun chiffre n'est modifié.",
     "account": {
-      "title": "Compte A2 Tools",
+      "title": "Discord",
       "signedOut": "Non connecté",
       "signedIn": "Connecté en tant que {name}",
       "hint": "Connectez-vous pour synchroniser vos personnages et paramètres avec a2tools.app.",
@@ -466,7 +466,7 @@
     "close": "Fermer"
   },
   "npcapPrompt": {
-    "ask": "A2Tools DPS Meter a besoin de Npcap pour lire le trafic réseau du jeu, et Npcap est absent ou ne fonctionne pas.\n\nL'installer maintenant ? Le meter télécharge l'installateur de Npcap depuis npcap.com et l'ouvre. Une fois Npcap installé, le meter commence la capture tout seul.\n\nChoisis Non pour l'installer toi-même depuis https://npcap.com/#download",
+    "ask": "TooWholeDPS Meter a besoin de Npcap pour lire le trafic réseau du jeu, et Npcap est absent ou ne fonctionne pas.\n\nL'installer maintenant ? Le meter télécharge l'installateur de Npcap depuis npcap.com et l'ouvre. Une fois Npcap installé, le meter commence la capture tout seul.\n\nChoisis Non pour l'installer toi-même depuis https://npcap.com/#download",
     "downloadFailed": "L'installateur de Npcap n'a pas pu être téléchargé ({error}).\n\nInstalle-le toi-même depuis https://npcap.com/#download, puis rouvre le meter.",
     "stillMissing": "Npcap ne fonctionne toujours pas. Si son installateur a été fermé avant la fin, installe Npcap depuis https://npcap.com/#download, puis rouvre le meter."
   }

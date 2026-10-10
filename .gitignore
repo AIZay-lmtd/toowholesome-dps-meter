@@ -62,3 +62,7 @@ settings.properties
 /packaging/arch/src/
 /packaging/arch/pkg/
 /packaging/arch/*.pkg.tar.zst
+release/
+
+# Npcap installers may not be redistributed
+npcap-*.exe

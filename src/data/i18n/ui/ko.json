@@ -1,6 +1,6 @@
 {
   "header": {
-    "title": "A2Tools DPS Meter",
+    "title": "TooWholeDPS Meter",
     "display": {
       "dps": "DPS",
       "total": "DMG",
@@ -343,7 +343,7 @@
     "showSupporterColors": "후원자 색상 표시",
     "showSupporterColorsHint": "후원자의 이름이 금색으로 표시됩니다. 표시 전용이며 수치에는 전혀 영향을 주지 않습니다.",
     "account": {
-      "title": "A2 Tools 계정",
+      "title": "Discord",
       "signedOut": "로그인되어 있지 않습니다",
       "signedIn": "{name}(으)로 로그인됨",
       "hint": "로그인하면 캐릭터와 설정이 a2tools.app과 동기화됩니다.",

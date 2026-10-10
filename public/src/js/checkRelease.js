@@ -1,5 +1,8 @@
 (() => {
-  const CDN_MANIFEST = "https://a2tools.app/latest-v2.json";
+  // TooWholeDPS: no update server yet. Point this at a latest.json of your own
+  // (same shape as upstream's latest-v2.json) to turn update checks on. Never
+  // point it at a2tools.app: that would offer the A2Tools installer instead.
+  const CDN_MANIFEST = "";
   const START_DELAY = 800,
     RETRY = 500,
     LIMIT = 5;
@@ -22,7 +25,7 @@
   const start = () =>
     setTimeout(async () => {
       try {
-        if (once) return;
+        if (once || !CDN_MANIFEST) return;
         once = true;
 
         // Wait for the bridge AND for the async version fetch to complete

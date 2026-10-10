@@ -1,0 +1,442 @@
+/* ============================================================
+   TooWholeDPS Meter: the "TooWhole" theme and personal-best UI.
+
+   Aion styling: a deep Abyss-indigo panel framed in Elyos gold,
+   Cinzel serif capitals for titles, gilded bars for your own row
+   and azure ones for your party. Everything is scoped to
+   [data-theme="toowhole"] except the personal-best widgets, which
+   use theme tokens so they fit every theme.
+   ============================================================ */
+
+@font-face {
+  font-family: "Cinzel";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/vendor/fonts/cinzel/cinzel-latin-400-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Cinzel";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/vendor/fonts/cinzel/cinzel-latin-600-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Cinzel";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/vendor/fonts/cinzel/cinzel-latin-700-normal.woff2") format("woff2");
+}
+
+:root {
+  /* Personal-best tokens; every theme gets them. */
+  --pb-gold: #e8c46a;
+  --pb-gold-deep: #a9802f;
+  --pb-ahead: #7ee08f;
+  --pb-behind: #ff8a7a;
+  --tw-serif: "Cinzel", "Trajan Pro", "Times New Roman", serif;
+}
+
+/* ---------- theme tokens ---------- */
+
+:root[data-theme="toowhole"] {
+  --row-fill: #3d6fb8;
+  --isUser-fill: #e3b54f;
+  --dmg-fill-bg: rgba(227, 181, 79, 0.8);
+
+  --warning-fill: #f2c66b;
+  --error-fill: #d9534f;
+
+  --text-color: #f6efe0;
+  --dps: #fff4d6;
+  --dps-text: #fff4d6;
+
+  --panel-border: rgba(227, 190, 110, 0.38);
+  --panel-bg: rgba(14, 12, 30, 0.94);
+  --title: #f3d89a;
+
+  --hud-bg: 13, 11, 28;
+  --hud-hairline: rgba(227, 190, 110, 0.16);
+  --hud-row-bg: rgba(120, 140, 255, 0.045);
+  --hud-name: #f6efe0;
+  --hud-num: #fff7e3;
+  --hud-sub: rgba(243, 216, 154, 0.55);
+  --hud-faint: rgba(243, 216, 154, 0.35);
+
+  --text-shadow:
+          0 0 1px rgba(0, 0, 0, 0.95),
+          0 1px 2px rgba(0, 0, 0, 0.9),
+          0 2px 6px rgba(0, 0, 0, 0.75);
+  --dps-shadow:
+          0 0 1px rgba(0, 0, 0, 0.96),
+          0 1px 2px rgba(0, 0, 0, 0.85),
+          0 0 10px rgba(227, 181, 79, 0.28);
+  --player-name-shadow:
+          -1px 0 0 rgba(0, 0, 0, 0.9),
+          1px 0 0 rgba(0, 0, 0, 0.9),
+          0 -1px 0 rgba(0, 0, 0, 0.9),
+          0 1px 0 rgba(0, 0, 0, 0.9),
+          0 3px 6px rgba(0, 0, 0, 0.75);
+}
+
+/* ---------- the frame ---------- */
+
+:root[data-theme="toowhole"] .meter {
+  border: 1px solid rgba(227, 190, 110, 0.55);
+  border-radius: 6px;
+  background:
+    radial-gradient(120% 80% at 50% -20%, rgba(90, 110, 220, 0.18), transparent 60%),
+    linear-gradient(180deg, rgba(var(--hud-bg), var(--window-opacity)) 0%, rgba(8, 6, 18, var(--window-opacity)) 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(10, 8, 20, 0.9),
+    inset 0 0 0 2px rgba(227, 190, 110, 0.18),
+    0 0 18px rgba(227, 181, 79, calc(var(--window-opacity) * 0.25)),
+    0 8px 28px rgba(0, 0, 0, calc(var(--window-opacity) * 0.55));
+}
+
+/* Gilded corner filigree: two L-shaped brackets drawn with gradients. */
+:root[data-theme="toowhole"] .meter::before,
+:root[data-theme="toowhole"] .meter::after {
+  content: "";
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  pointer-events: none;
+  z-index: 5;
+  border-color: #e8c46a;
+  border-style: solid;
+  filter: drop-shadow(0 0 3px rgba(232, 196, 106, 0.6));
+}
+:root[data-theme="toowhole"] .meter::before {
+  top: -1px;
+  left: -1px;
+  border-width: 2px 0 0 2px;
+  border-top-left-radius: 6px;
+}
+:root[data-theme="toowhole"] .meter::after {
+  bottom: -1px;
+  right: -1px;
+  border-width: 0 2px 2px 0;
+  border-bottom-right-radius: 6px;
+}
+
+/* ---------- header ---------- */
+
+:root[data-theme="toowhole"] .header {
+  position: relative;
+  background: linear-gradient(180deg, rgba(227, 190, 110, 0.10), rgba(227, 190, 110, 0) 85%);
+}
+/* A gold rule with a diamond at its centre under the title row. */
+:root[data-theme="toowhole"] .header::after {
+  content: "";
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(232, 196, 106, 0.75) 20%, rgba(232, 196, 106, 0.75) 80%, transparent);
+}
+:root[data-theme="toowhole"] .header::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -3px;
+  width: 6px;
+  height: 6px;
+  transform: translateX(-50%) rotate(45deg);
+  background: #e8c46a;
+  box-shadow: 0 0 6px rgba(232, 196, 106, 0.8);
+  z-index: 1;
+}
+
+:root[data-theme="toowhole"] .header .bossNames .bossName {
+  font-family: var(--tw-serif);
+  font-variation-settings: normal;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #f3d89a;
+  background: linear-gradient(180deg, #fff1c4 0%, #e8c46a 55%, #b88b33 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.95));
+}
+/* Hangul and Hanzi have no Cinzel glyphs: plain gold in their own face. */
+:root[data-theme="toowhole"] .header .bossNames .bossName:lang(ko),
+:root[data-theme="toowhole"] .header .bossNames .bossName:lang(zh-Hans),
+:root[data-theme="toowhole"] .header .bossNames .bossName:lang(zh-Hant),
+:root[data-theme="toowhole"] .header .bossNames .bossName:lang(ja) {
+  font-family: var(--cjk-font-stack);
+}
+
+:root[data-theme="toowhole"] .header .headerBtns,
+:root[data-theme="toowhole"] .header .bossIcon {
+  color: rgba(232, 196, 106, 0.6);
+}
+:root[data-theme="toowhole"] .header .headerBtns .headerBtn:hover,
+:root[data-theme="toowhole"] .header .bossIcon:hover {
+  color: #fff1c4;
+  filter: drop-shadow(0 0 4px rgba(232, 196, 106, 0.9));
+}
+
+/* ---------- boss HP ---------- */
+
+:root[data-theme="toowhole"] .bossHpBar {
+  background: rgba(6, 4, 14, 0.7);
+  border-top-color: rgba(232, 196, 106, 0.25);
+  border-bottom-color: rgba(232, 196, 106, 0.25);
+}
+:root[data-theme="toowhole"] .bossHpFill {
+  background: linear-gradient(180deg, #c8414b 0%, #7d1f2c 100%);
+}
+:root[data-theme="toowhole"] .bossHpFill::after {
+  background: #ffd9a0;
+  box-shadow: 0 0 8px 1px rgba(255, 190, 110, 0.8);
+}
+:root[data-theme="toowhole"] .bossHpBar.isMid .bossHpFill { background: linear-gradient(180deg, #d0613f 0%, #8f3322 100%); }
+:root[data-theme="toowhole"] .bossHpBar.isLow .bossHpFill { background: linear-gradient(180deg, #e6a63c 0%, #9c6516 100%); }
+
+/* ---------- rows ---------- */
+
+:root[data-theme="toowhole"] .list .item {
+  border-radius: 3px;
+  border: 1px solid rgba(232, 196, 106, 0.08);
+}
+:root[data-theme="toowhole"] .list .item:hover {
+  background: rgba(232, 196, 106, 0.08);
+  border-color: rgba(232, 196, 106, 0.25);
+}
+:root[data-theme="toowhole"] .list .item .fill {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--bar) 18%, transparent) 0%,
+    color-mix(in srgb, var(--bar) 58%, transparent) 100%
+  );
+}
+:root[data-theme="toowhole"] .list .item.isUser {
+  border-color: rgba(232, 196, 106, 0.4);
+  box-shadow: inset 0 0 12px rgba(232, 196, 106, 0.12);
+}
+:root[data-theme="toowhole"] .list .item.isUser .fill {
+  background: linear-gradient(
+    90deg,
+    rgba(169, 128, 47, 0.25) 0%,
+    rgba(227, 181, 79, 0.55) 70%,
+    rgba(255, 230, 160, 0.7) 100%
+  );
+}
+:root[data-theme="toowhole"] .list .item.isUser::before {
+  width: 3px;
+  background: linear-gradient(180deg, #fff1c4, #e8c46a 50%, #a9802f);
+}
+:root[data-theme="toowhole"] .list .item .content .rank {
+  font-family: var(--tw-serif);
+  font-weight: 700;
+  color: rgba(232, 196, 106, 0.8);
+}
+
+/* ---------- panels: settings, history, details ---------- */
+
+:root[data-theme="toowhole"] .settingsPanel,
+:root[data-theme="toowhole"] .historyPanel,
+:root[data-theme="toowhole"] .detailsPanel {
+  border-color: rgba(227, 190, 110, 0.45);
+}
+:root[data-theme="toowhole"] .settingsMiniTitle,
+:root[data-theme="toowhole"] .historyTitle,
+:root[data-theme="toowhole"] .detailsFightTitle {
+  font-family: var(--tw-serif);
+  letter-spacing: 0.06em;
+  color: #f3d89a;
+}
+
+/* ============================================================
+   Personal bests (every theme)
+   ============================================================ */
+
+.pbStrip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 5px 8px 0;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-family: var(--hud-tech);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--hud-sub, rgba(255, 255, 255, 0.6));
+  background: linear-gradient(90deg, rgba(232, 196, 106, 0.16), rgba(232, 196, 106, 0.03));
+  border: 1px solid rgba(232, 196, 106, 0.28);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+}
+.pbStrip[hidden] { display: none; }
+.pbStripLabel {
+  font-family: var(--tw-serif);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--pb-gold);
+}
+.pbStripBest { color: rgba(255, 244, 214, 0.85); }
+.pbStripDelta { margin-left: auto; font-weight: 600; }
+.pbStripDelta.isAhead { color: var(--pb-ahead); }
+.pbStripDelta.isBehind { color: var(--pb-behind); }
+.meter.slim .pbStrip { font-size: 9.5px; margin: 3px 6px 0; padding: 1px 6px; }
+
+.pbBanner {
+  position: absolute;
+  left: 50%;
+  top: 34px;
+  z-index: 40;
+  min-width: 70%;
+  max-width: calc(100% - 16px);
+  transform: translateX(-50%);
+  padding: 8px 14px 9px;
+  text-align: center;
+  border-radius: 4px;
+  border: 1px solid #e8c46a;
+  background:
+    radial-gradient(100% 140% at 50% 0%, rgba(255, 225, 150, 0.28), transparent 70%),
+    rgba(18, 12, 30, 0.96);
+  box-shadow: 0 0 22px rgba(232, 196, 106, 0.55), inset 0 0 0 1px rgba(10, 8, 20, 0.9);
+  animation: pbBannerIn 520ms cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+}
+.pbBanner.isLeaving {
+  opacity: 0;
+  transform: translateX(-50%) translateY(-6px);
+  transition: opacity 700ms ease, transform 700ms ease;
+}
+.pbBannerTitle {
+  font-family: var(--tw-serif);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.08em;
+  background: linear-gradient(180deg, #fff1c4 0%, #e8c46a 60%, #b88b33 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.pbBannerBody {
+  margin-top: 2px;
+  font-family: var(--hud-tech);
+  font-size: 12px;
+  color: #fff4d6;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+@keyframes pbBannerIn {
+  0% { opacity: 0; transform: translateX(-50%) scale(0.85); }
+  60% { opacity: 1; transform: translateX(-50%) scale(1.04); }
+  100% { transform: translateX(-50%) scale(1); }
+}
+
+.pbPanel {
+  position: absolute;
+  top: 30px;
+  right: 6px;
+  z-index: 45;
+  width: min(330px, calc(100% - 12px));
+  max-height: 320px;
+  display: flex;
+  flex-direction: column;
+  border-radius: 5px;
+  border: 1px solid rgba(232, 196, 106, 0.5);
+  background: rgba(14, 12, 30, 0.97);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 14px rgba(232, 196, 106, 0.2);
+  color: #f6efe0;
+}
+.pbPanel[hidden] { display: none; }
+.meter.pbOpen { min-height: 340px; }
+.pbPanelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 10px;
+  border-bottom: 1px solid rgba(232, 196, 106, 0.3);
+}
+.pbPanelTitle {
+  font-family: var(--tw-serif);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  color: var(--pb-gold);
+}
+.pbPanelClose,
+.pbPanelReset {
+  border: 0;
+  background: none;
+  color: rgba(243, 216, 154, 0.7);
+  cursor: pointer;
+  font: inherit;
+}
+.pbPanelClose:hover,
+.pbPanelReset:hover { color: #fff1c4; }
+.pbPanelList {
+  overflow-y: auto;
+  padding: 4px 6px;
+}
+.pbPanelEmpty {
+  padding: 14px 8px;
+  font-size: 12px;
+  color: rgba(243, 216, 154, 0.6);
+  text-align: center;
+}
+.pbItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 6px;
+  border-bottom: 1px solid rgba(232, 196, 106, 0.1);
+}
+.pbItem:last-child { border-bottom: 0; }
+.pbItemText { flex: 1; min-width: 0; }
+.pbItemBoss {
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pbItemMeta {
+  font-size: 10.5px;
+  color: rgba(243, 216, 154, 0.55);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pbItemDps {
+  font-family: var(--hud-tech);
+  font-size: 14px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--pb-gold);
+}
+.pbPanelFooter {
+  padding: 5px 10px 7px;
+  border-top: 1px solid rgba(232, 196, 106, 0.2);
+  text-align: right;
+  font-size: 11px;
+}
+
+/* ============================================================
+   a2tools.app features this build does not offer
+   (sign-in, log uploads, packet-log reports, the upstream
+   project's donation links). See UPSTREAM_SERVICES in app.rs.
+   ============================================================ */
+
+.accountRow,
+.accountCodeBox,
+.settingsToggle:has(.autoUploadCheckbox),
+.settingsToggle:has(.showSupporterColorsCheckbox),
+.sendLogsRow,
+.a2toolsButton,
+.supportButton,
+.supportModal,
+.accountPromo,
+.historyUploadBtn {
+  display: none !important;
+}

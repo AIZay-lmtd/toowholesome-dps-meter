@@ -1,8 +1,9 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "A2Tools DPS Meter",
-  "version": "2.0.55",
-  "identifier": "com.a2tools.dps-meter",
+  "productName": "TooWholeDPS Meter",
+  "version": "1.0.0",
+  "identifier": "com.toowhole.dps-meter",
+  "mainBinaryName": "TooWholeDPS-Meter",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",
@@ -13,7 +14,7 @@
     "withGlobalTauri": true,
     "windows": [
       {
-        "title": "A2Tools DPS Meter",
+        "title": "TooWholeDPS Meter",
         "width": 400,
         "height": 300,
         "decorations": false,
@@ -48,12 +49,16 @@
         "frame-src": "'none'",
         "form-action": "'none'"
       },
-      "dangerousDisableAssetCspModification": ["style-src"]
+      "dangerousDisableAssetCspModification": [
+        "style-src"
+      ]
     }
   },
   "bundle": {
     "active": true,
-    "targets": ["msi"],
+    "targets": [
+      "msi"
+    ],
     "resources": [
       "../src/data"
     ],
@@ -67,7 +72,8 @@
     "windows": {
       "allowDowngrades": true,
       "wix": {
-        "template": "wix/main.wxs"
+        "template": "wix/main.wxs",
+        "upgradeCode": "CD501C7C-D8A5-4797-9640-997BCA628AE2"
       },
       "webviewInstallMode": {
         "type": "skip"
@@ -81,6 +87,8 @@
         ],
         "postInstallScript": "../packaging/linux/postinst.sh"
       }
-    }
+    },
+    "publisher": "TooWhole",
+    "copyright": "TooWholeDPS Meter is a GPL-3.0 fork of A2Tools DPS Meter (github.com/taengu/A2Tools-DPS-Meter)"
   }
 }

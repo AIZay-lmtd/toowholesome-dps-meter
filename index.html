@@ -5,10 +5,14 @@
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1" />
-    <title>A2Tools DPS Meter</title>
+    <title>TooWholeDPS Meter</title>
     <script src="/src/js/settingsBootstrap.js"></script>
     <link
       href="/src/styles.css"
+      rel="stylesheet"
+      type="text/css" />
+    <link
+      href="/src/toowhole.css"
       rel="stylesheet"
       type="text/css" />
     <!--
@@ -57,6 +61,7 @@
           <div class="headerBtns">
             <div class="headerBtn lockBtn" style="display:none" role="button" tabindex="0" aria-label="Lock overlay (click-through)" data-i18n-aria-label="settings.showLockBtn"><i data-lucide="lock-open"></i></div>
             <div class="headerBtn suspendBtn" style="display:none"><i data-lucide="power"></i></div>
+            <div class="headerBtn pbBtn" role="button" tabindex="0" aria-label="Personal bests" title="Personal bests"><i data-lucide="trophy"></i></div>
             <div class="headerBtn historyBtn" role="button" tabindex="0" aria-label="Fight history" data-i18n-aria-label="history.title"><i data-lucide="scroll-text"></i></div>
             <div class="headerBtn resetBtn"><i data-lucide="rotate-ccw"></i></div>
             <div class="headerBtn settingsBtn"><i data-lucide="settings"></i></div>
@@ -1261,5 +1266,6 @@
 
     <script src="/src/js/i18n.js"></script>
     <script src="/src/js/core.js?v=2018a"></script>
+    <script src="/src/js/personalBests.js"></script>
   </body>
 </html>

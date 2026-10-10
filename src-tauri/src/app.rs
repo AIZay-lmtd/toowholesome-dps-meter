@@ -32,6 +32,7 @@ use crate::entity::dps_data::DpsData;
 use crate::entity::fight_record::{FightRecord, FightSummary};
 use crate::entity::details_context::{DetailsContext, TargetDetailsResponse};
 use crate::history::fight_history::FightHistoryManager;
+use crate::history::personal_bests::{PersonalBest, PersonalBestStore};
 use crate::i18n::lookup::{NpcLookup, SkillLookup};
 
 /// Monitor the Details window was last placed on. Recorded here rather than
@@ -59,6 +60,8 @@ pub struct AppState {
     pub ping_tracker: Arc<PingTracker>,
     pub port_detector: Arc<CombatPortDetector>,
     pub fight_history: FightHistoryManager,
+    /// TooWholeDPS: the local player's best DPS per boss.
+    pub personal_bests: PersonalBestStore,
     /// Order fight snapshots and their writes together. Settings never take
     /// this lock; the calculator guard is released before disk work.
     pub fight_save: Mutex<()>,
@@ -217,6 +220,39 @@ async fn get_fight_history(app: tauri::AppHandle) -> Result<Vec<FightSummary>, S
     }).await
 }
 
+/// TooWholeDPS: every personal best, newest first.
+#[tauri::command]
+fn get_personal_bests(state: tauri::State<'_, AppState>) -> Vec<PersonalBest> {
+    state.personal_bests.list()
+}
+
+/// TooWholeDPS: build personal bests from the fights already in History, for
+/// `character` (the local player's name; the only unmasked name in a record).
+/// Returns how many bosses have a best.
+#[tauri::command]
+async fn backfill_personal_bests(app: tauri::AppHandle, character: String) -> Result<usize, String> {
+    let character = character.trim().to_string();
+    if character.is_empty() {
+        return Err("No character name".into());
+    }
+    crate::blocking::HISTORY.run(move || {
+        let state = app.state::<AppState>();
+        let records: Vec<FightRecord> = state
+            .fight_history
+            .list_fights()
+            .iter()
+            .filter(|f| !f.is_train && f.mob_code != 0 && !f.is_live)
+            .filter_map(|f| state.fight_history.load_fight(&f.id).ok())
+            .collect();
+        state.personal_bests.backfill(records.iter(), &character)
+    }).await
+}
+
+#[tauri::command]
+fn clear_personal_bests(state: tauri::State<'_, AppState>) {
+    state.personal_bests.clear();
+}
+
 #[tauri::command]
 async fn save_fight(app: tauri::AppHandle, record: FightRecord) -> Result<(), String> {
     crate::blocking::HISTORY.run(move || {
@@ -267,9 +303,18 @@ async fn upload_fight(
     state: tauri::State<'_, AppState>,
     fight_id: String,
 ) -> Result<share::UploadResult, String> {
+    if !UPSTREAM_SERVICES {
+        return Err(UPSTREAM_SERVICES_OFF.into());
+    }
     let record = state.fight_history.load_fight(&fight_id)?;
     share::upload(&state.http, &state.app_data_dir, &record, &state.settings).await
 }
+
+/// TooWholeDPS: uploads, sign-in and the supporter roster belong to the
+/// a2tools.app service, which third-party meters may only use with its
+/// maintainers' permission (see README). Off in this build.
+const UPSTREAM_SERVICES: bool = false;
+const UPSTREAM_SERVICES_OFF: &str = "Online log uploads are not available in TooWholeDPS Meter.";
 
 /// Upload a finished fight in the background, and tell every window.
 ///
@@ -279,6 +324,9 @@ async fn upload_fight(
 /// (offline, a server error, a rate limit) is tried again later, on the
 /// schedule in `share::note_auto_upload_failure`.
 fn auto_upload(app: tauri::AppHandle, record: FightRecord) {
+    if !UPSTREAM_SERVICES {
+        return;
+    }
     let Some(in_flight) = InFlight::start(&record.id) else { return };
     tauri::async_runtime::spawn(async move {
         let _in_flight = in_flight;
@@ -307,9 +355,21 @@ fn auto_upload(app: tauri::AppHandle, record: FightRecord) {
 /// Save fights to History, with the packets behind each so it can be uploaded
 /// and verified later (training dummies are not logs), and auto-upload the
 /// finished ones when that is on.
-fn save_fight_records(app: &tauri::AppHandle, state: &AppState, records: Vec<FightRecord>) {
+/// `final_save`: combat data is about to be cleared, so these are the
+/// fights' last saves.
+fn save_fight_records(app: &tauri::AppHandle, state: &AppState, records: Vec<FightRecord>, final_save: bool) {
+    let now_ms = crate::clock::now_ms();
+    let local_name = state.data_storage.local_profile().name;
+    let local_id = state.data_storage.local_player_id().map(|id| id as i32);
     for record in &records {
         let _ = state.fight_history.save_fight(record);
+        let settled = final_save
+            || now_ms - (record.start_time_ms + record.duration_ms)
+                >= crate::history::personal_bests::SETTLED_AFTER_MS;
+        if let Some(outcome) = state.personal_bests.consider(record, local_name.as_deref(), local_id, settled) {
+            tracing::info!("New personal best on {}: {} DPS", outcome.best.boss_name, outcome.best.dps);
+            let _ = app.emit("personal-best", &outcome);
+        }
         if !record.is_train {
             if let Err(e) = share::save_slice(&state.app_data_dir, record, &state.data_storage) {
                 // A fight that began before the meter did is normal; anything
@@ -349,7 +409,7 @@ fn save_fights_before_reset(app: &tauri::AppHandle) {
     if !records.is_empty() {
         tracing::info!("Saving {} fight(s) before combat data is cleared", records.len());
     }
-    save_fight_records(app, &state, records);
+    save_fight_records(app, &state, records, true);
 }
 
 /// Fights with an automatic upload running. One upload of a fight at a time:
@@ -460,6 +520,9 @@ async fn account_begin_link(
     app: tauri::AppHandle,
     state: tauri::State<'_, AppState>,
 ) -> Result<crate::account::LinkPrompt, String> {
+    if !UPSTREAM_SERVICES {
+        return Err(UPSTREAM_SERVICES_OFF.into());
+    }
     let grant = crate::account::start(&state.http, &crate::account::device_label()).await?;
     let prompt = crate::account::LinkPrompt::from(&grant);
 
@@ -752,6 +815,9 @@ fn set_packet_logging(state: tauri::State<'_, AppState>, enabled: bool) {
 async fn send_logs_to_dev(
     state: tauri::State<'_, AppState>,
 ) -> Result<share::dev_logs::SendResult, String> {
+    if !UPSTREAM_SERVICES {
+        return Err(UPSTREAM_SERVICES_OFF.into());
+    }
     share::dev_logs::send(&state.http, &state.app_data_dir).await
 }
 
@@ -897,7 +963,7 @@ async fn show_update_window(
     let msg = format!("A new update is available!\n\nCurrent: {}\nLatest: {}\n\nDownload and install now?", current, latest);
 
     let accepted = tokio::task::spawn_blocking(move || {
-        platform::dialog::ask_yes_no("A2Tools - Update Available", &msg)
+        platform::dialog::ask_yes_no("TooWholeDPS - Update Available", &msg)
     }).await.unwrap_or(false);
 
     if accepted {
@@ -910,7 +976,7 @@ async fn show_update_window(
                 // Show error dialog
                 let _ = tokio::task::spawn_blocking(move || {
                     platform::dialog::show_error(
-                        "A2Tools - Update Error",
+                        "TooWholeDPS - Update Error",
                         &format!("Download failed: {}\n\nPlease download manually.", e),
                     );
                 }).await;
@@ -1083,6 +1149,9 @@ fn load_supporter_override(app_data_dir: &std::path::Path) -> Option<crate::supp
 /// a cosmetic, and there is no version of "the CDN is down" that should produce
 /// a visible error, a retry storm, or a wrong answer.
 async fn fetch_supporter_roster(client: &reqwest::Client) -> Option<crate::supporters::Roster> {
+    if !UPSTREAM_SERVICES {
+        return None;
+    }
     let response = client
         .get(SUPPORTER_ROSTER_URL)
         .timeout(Duration::from_secs(30))
@@ -1276,7 +1345,7 @@ fn open_details_on_monitor_inner(
         tauri::WebviewUrl::App("index.html".into()),
     )
     .initialization_script("window.__A2_VIEW__ = 'details';")
-    .title("A2Tools DPS Meter — Details")
+    .title("TooWholeDPS Meter — Details")
     .decorations(false)
     .transparent(false)
     // Intentional: the point of this window is to stay readable on a second
@@ -1506,7 +1575,7 @@ fn build_settings_window(app: &tauri::AppHandle) -> Result<(), String> {
     // Injected before any page script. WebviewUrl::App is a path, so a ?query
     // gets percent-encoded — this is the one channel that is reliable.
     .initialization_script(SETTINGS_WINDOW_SCRIPT)
-    .title("A2Tools DPS Meter — Settings")
+    .title("TooWholeDPS Meter — Settings")
     .decorations(false)
     .transparent(false)
     // Matches Details: the overlay itself is always-on-top, so a settings window
@@ -1752,7 +1821,7 @@ fn open_fight_window(app: &tauri::AppHandle, label: &str) -> Result<(), String> 
         tauri::WebviewUrl::App("index.html".into()),
     )
     .initialization_script("window.__A2_VIEW__ = 'details';")
-    .title("A2Tools DPS Meter — Fight")
+    .title("TooWholeDPS Meter — Fight")
     .decorations(false)
     .transparent(false)
     .always_on_top(true)
@@ -1787,7 +1856,7 @@ fn open_history_window_inner(app: &tauri::AppHandle) -> Result<(), String> {
         tauri::WebviewUrl::App("index.html".into()),
     )
     .initialization_script("window.__A2_VIEW__ = 'history';")
-    .title("A2Tools DPS Meter — Battle History")
+    .title("TooWholeDPS Meter — Battle History")
     .decorations(false)
     .transparent(false)
     .always_on_top(true)
@@ -1824,7 +1893,7 @@ fn open_details_windowed(app: &tauri::AppHandle) -> Result<(), String> {
         tauri::WebviewUrl::App("index.html".into()),
     )
     .initialization_script("window.__A2_VIEW__ = 'details';")
-    .title("A2Tools DPS Meter — Details")
+    .title("TooWholeDPS Meter — Details")
     .decorations(false)
     .transparent(false)
     .always_on_top(true)
@@ -2381,6 +2450,7 @@ pub fn run() {
                 ping_tracker: ping_tracker.clone(),
                 port_detector: port_detector.clone(),
                 fight_history: FightHistoryManager::new(app_data_dir.clone()),
+                personal_bests: PersonalBestStore::new(app_data_dir.clone()),
                 fight_save: Mutex::new(()),
                 settings,
                 skill_lookup: skill_lookup.clone(),
@@ -2388,7 +2458,7 @@ pub fn run() {
                 app_data_dir: app_data_dir.clone(),
                 i18n_data_dir: found_data_dir.clone(),
                 http: reqwest::Client::builder()
-                    .user_agent(concat!("A2Tools-DPS-Meter/", env!("CARGO_PKG_VERSION")))
+                    .user_agent(concat!("TooWholeDPS-Meter/", env!("CARGO_PKG_VERSION")))
                     .connect_timeout(Duration::from_secs(10))
                     .timeout(Duration::from_secs(30))
                     .build()
@@ -2729,7 +2799,7 @@ pub fn run() {
                                 .map(|mut calc| calc.snapshot_boss_fights());
                             if let Some(records) = records {
                                 // The calculator guard is gone before any disk I/O.
-                                save_fight_records(&handle, &state, records);
+                                save_fight_records(&handle, &state, records, false);
                             }
                         }
                         // Automatic uploads that failed and are due again,
@@ -2814,6 +2884,9 @@ pub fn run() {
             get_details_context,
             get_fight_buffs,
             get_fight_history,
+            get_personal_bests,
+            backfill_personal_bests,
+            clear_personal_bests,
             save_fight,
             load_fight,
             delete_fight,

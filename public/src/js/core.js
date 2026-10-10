@@ -99,8 +99,9 @@ class DpsApp {
     this._windowHidden = false;
     this.displayMode = "dps";
     this.betaUi = true;
-    this.theme = "aion2";
+    this.theme = "toowhole";
     this.availableThemes = [
+      "toowhole",
       "aion2",
       "asmodian",
       "cogni",
@@ -1145,6 +1146,8 @@ class DpsApp {
       targetCurrentHp,
       targetIsBoss,
       dungeonId,
+      targetMobCode,
+      targetPbDungeonId,
     } = this.buildRowsFromPayload(raw);
     // Boss mode with no boss engaged: say what it is waiting for. The rows of
     // the last fight can still be on screen (the meter keeps them), so this
@@ -1320,6 +1323,12 @@ class DpsApp {
     this.updateMeterTotalBar(rowsToRender);
     this.meterUI.updateFromRows(rowsToRender);
     if (targetChanged) this.refreshHoverTooltipForTarget(rowsToRender);
+    window.TooWholePB?.onFrame?.({
+      rows: rowsToRender,
+      mobCode: targetMobCode,
+      pbDungeonId: targetPbDungeonId,
+      battleTimeMs,
+    });
   }
 
   buildRowsFromPayload(raw) {
@@ -1348,8 +1357,12 @@ class DpsApp {
       ? Number(payload.targetCurrentHp)
       : -1;
     const targetIsBoss = payload?.targetIsBoss === true;
+    const targetMobCode = Math.trunc(Number(payload?.targetMobCode)) || 0;
+    const targetPbDungeonId = Math.trunc(Number(payload?.targetPbDungeonId)) || 0;
 
     return {
+      targetMobCode,
+      targetPbDungeonId,
       rows,
       targetName,
       targetMode,
@@ -3020,7 +3033,7 @@ class DpsApp {
       const textColor = computed.getPropertyValue("--text-color").trim() || "#ffffff";
       const nameShadow = computed.getPropertyValue("--player-name-shadow").trim() || "none";
       const rowFill = computed.getPropertyValue("--row-fill").trim() || "#2f2f2f";
-      root.dataset.theme = previous || "aion2";
+      root.dataset.theme = previous || "toowhole";
       const preview = { textColor, nameShadow, rowFill };
       this._themePreviewCache.set(themeId, preview);
       return preview;
@@ -3101,6 +3114,7 @@ class DpsApp {
     ];
 
     const themeOptions = [
+      { value: "toowhole", label: this.i18n?.t("settings.theme.options.toowhole", "TooWhole (Aion Gold)") },
       { value: "aion2", label: this.i18n?.t("settings.theme.options.aion2", "AION2") },
       { value: "asmodian", label: this.i18n?.t("settings.theme.options.asmodian", "Asmodian") },
       { value: "cogni", label: this.i18n?.t("settings.theme.options.cogni", "Cogni") },
@@ -5182,7 +5196,7 @@ class DpsApp {
       }
       return this.i18n?.t("target.train", "Training Scarecrow") ?? "Training Scarecrow";
     }
-    return this.i18n?.t("header.title", "A2Tools DPS Meter") ?? "A2Tools DPS Meter";
+    return this.i18n?.t("header.title", "TooWholeDPS Meter") ?? "TooWholeDPS Meter";
   }
 
   getTargetLabel({ targetId = 0, targetName = "", targetMode = "", dungeonId = 0 } = {}) {
