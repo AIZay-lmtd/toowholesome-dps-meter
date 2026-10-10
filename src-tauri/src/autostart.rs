@@ -5,12 +5,15 @@
 //! starts the meter at sign-in with `--background`. In that mode the overlay
 //! starts hidden, appears when the AION 2 window does, and hides again a few
 //! seconds after the game closes. The task runs with highest privileges, so
-//! packet capture works without a UAC prompt at every sign-in; registering it
-//! therefore needs the meter itself to be running as administrator.
+//! packet capture works without a UAC prompt at every sign-in. Registering
+//! such a task needs administrator rights: a meter that is not elevated runs
+//! a copy of itself with `--autostart-helper=on|off` through one UAC prompt.
 
 use std::sync::Mutex;
 
 pub const BACKGROUND_ARG: &str = "--background";
+/// `--autostart-helper=on` / `=off`: register or remove the task and exit.
+pub const HELPER_ARG: &str = "--autostart-helper=";
 pub const TASK_NAME: &str = "TooWholesome DPS Meter";
 /// Names the task had in earlier versions. Their command points at the old
 /// install folder, so `migrate_legacy` re-registers them under `TASK_NAME`.
@@ -22,6 +25,16 @@ const HIDE_AFTER_ABSENT_CHECKS: u32 = 5;
 
 pub fn launched_in_background() -> bool {
     std::env::args().any(|a| a == BACKGROUND_ARG)
+}
+
+/// When started as the elevated helper, do its one job and return the exit
+/// code; `None` for a normal start.
+pub fn run_helper_if_asked() -> Option<i32> {
+    let wanted = std::env::args().find_map(|a| a.strip_prefix(HELPER_ARG).map(|v| v == "on"))?;
+    Some(match imp::set_enabled_here(wanted) {
+        Ok(()) => 0,
+        Err(_) => 1,
+    })
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -127,7 +140,7 @@ mod imp {
     use std::os::windows::process::CommandExt;
     use std::process::{Command, Output};
 
-    use super::{task_xml, LEGACY_TASK_NAMES, TASK_NAME};
+    use super::{task_xml, HELPER_ARG, LEGACY_TASK_NAMES, TASK_NAME};
 
     const CREATE_NO_WINDOW: u32 = 0x0800_0000;
 
@@ -142,7 +155,7 @@ mod imp {
     fn failure(output: &Output) -> String {
         let text = String::from_utf8_lossy(&output.stderr);
         if text.to_lowercase().contains("access is denied") {
-            "Windows refused: run TooWholesome DPS Meter as administrator, then try again.".into()
+            "Windows refused: administrator rights are needed for this.".into()
         } else {
             format!("Task Scheduler said: {}", text.trim())
         }
@@ -160,11 +173,15 @@ mod imp {
     /// name and this exe, then drop the old one. Quietly does nothing when
     /// there is none, or when not elevated (it is tried again next start).
     pub fn migrate_legacy() {
+        // Never a UAC prompt at startup: only an elevated meter moves it.
+        if !crate::platform::admin::is_admin() {
+            return;
+        }
         for &old in LEGACY_TASK_NAMES {
             if !exists(old) {
                 continue;
             }
-            match set_enabled(true) {
+            match set_enabled_here(true) {
                 Ok(()) => {
                     let _ = schtasks(&["/Delete", "/TN", old, "/F"]);
                     tracing::info!("Moved the start-with-AION-2 task from {old:?} to {TASK_NAME:?}");
@@ -174,7 +191,64 @@ mod imp {
         }
     }
 
+    /// Register or remove the task, asking Windows for administrator rights
+    /// (one UAC prompt) when this meter is not elevated.
     pub fn set_enabled(enabled: bool) -> Result<(), String> {
+        if crate::platform::admin::is_admin() {
+            return set_enabled_here(enabled);
+        }
+        run_elevated_helper(enabled)?;
+        if is_enabled() == enabled {
+            Ok(())
+        } else {
+            Err("Windows did not save the change. Try again, or run the meter as administrator.".into())
+        }
+    }
+
+    /// Run this exe elevated with `--autostart-helper=…` and wait for it.
+    fn run_elevated_helper(enabled: bool) -> Result<(), String> {
+        use std::os::windows::ffi::OsStrExt;
+        use windows::core::{w, PCWSTR};
+        use windows::Win32::Foundation::{CloseHandle, ERROR_CANCELLED};
+        use windows::Win32::System::Threading::{GetExitCodeProcess, WaitForSingleObject, INFINITE};
+        use windows::Win32::UI::Shell::{ShellExecuteExW, SEE_MASK_NOCLOSEPROCESS, SHELLEXECUTEINFOW};
+        use windows::Win32::UI::WindowsAndMessaging::SW_HIDE;
+
+        let exe = std::env::current_exe().map_err(|e| format!("Could not find the meter's program file: {e}"))?;
+        let wide = |s: &std::ffi::OsStr| s.encode_wide().chain(std::iter::once(0)).collect::<Vec<u16>>();
+        let file = wide(exe.as_os_str());
+        let params = wide(std::ffi::OsStr::new(&format!("{HELPER_ARG}{}", if enabled { "on" } else { "off" })));
+        let mut info = SHELLEXECUTEINFOW {
+            cbSize: std::mem::size_of::<SHELLEXECUTEINFOW>() as u32,
+            fMask: SEE_MASK_NOCLOSEPROCESS,
+            lpVerb: w!("runas"),
+            lpFile: PCWSTR(file.as_ptr()),
+            lpParameters: PCWSTR(params.as_ptr()),
+            nShow: SW_HIDE.0,
+            ..Default::default()
+        };
+        // SAFETY: `info` and the strings it points to live across the call.
+        if let Err(e) = unsafe { ShellExecuteExW(&mut info) } {
+            return Err(if e.code() == ERROR_CANCELLED.to_hresult() {
+                "Windows needs your permission for this. Click Yes on the prompt to turn it on or off.".into()
+            } else {
+                format!("Could not ask Windows for permission: {e}")
+            });
+        }
+        if info.hProcess.is_invalid() {
+            return Ok(());
+        }
+        let mut code = 1u32;
+        // SAFETY: a process handle ShellExecuteExW opened for us; closed once.
+        unsafe {
+            WaitForSingleObject(info.hProcess, INFINITE);
+            let _ = GetExitCodeProcess(info.hProcess, &mut code);
+            let _ = CloseHandle(info.hProcess);
+        }
+        if code == 0 { Ok(()) } else { Err("Task Scheduler could not save the change.".into()) }
+    }
+
+    pub fn set_enabled_here(enabled: bool) -> Result<(), String> {
         if !enabled {
             for &old in LEGACY_TASK_NAMES {
                 if exists(old) {
@@ -218,6 +292,10 @@ mod imp {
     }
 
     pub fn migrate_legacy() {}
+
+    pub fn set_enabled_here(enabled: bool) -> Result<(), String> {
+        set_enabled(enabled)
+    }
 }
 
 pub use imp::{is_enabled, migrate_legacy, set_enabled};

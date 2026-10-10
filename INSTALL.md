@@ -58,8 +58,8 @@ To skip this every time, turn on **Start automatically with AION 2** (step 7).
 
 ## 7. Start automatically with AION 2 (optional)
 
-1. Make sure the meter is running **as administrator** (step 4).
-2. Open **Settings** (gear icon) and turn on **Start automatically with AION 2**.
+1. Open **Settings** (gear icon) and turn on **Start automatically with AION 2**.
+2. If Windows asks "Do you want to allow this app to make changes?", click **Yes**. It asks once, because the sign-in task runs the meter with administrator rights.
 
 From then on:
 - The meter starts hidden when you sign in to Windows, with no UAC prompt.
@@ -69,7 +69,7 @@ From then on:
 
 To stop this, turn the setting off. Uninstalling the meter also removes it.
 
-> Behind the scenes, this is a Windows Task Scheduler task named **"TooWholesome DPS Meter"** that runs at sign-in. It needs administrator rights to create because it lets the meter capture packets without asking each time.
+> Behind the scenes, this is a Windows Task Scheduler task named **"TooWholesome DPS Meter"** that runs at sign-in. Creating it needs your permission once, because it lets the meter capture packets without asking each time.
 
 ## 8. Using it
 
@@ -89,11 +89,17 @@ To stop this, turn the setting off. Uninstalling the meter also removes it.
   - Wipes don't count, only kills.
 - **Theme:** TooWholesome (Aion Gold) is the default. Every original theme is still available under Settings → Theme.
 
+## Updates
+
+When a new version is released, the meter shows **"A new update is available!"** a few seconds after it starts. Click **Yes**: it downloads the installer, checks it against the checksum published with the release, and installs it. Your history, personal bests and settings are kept.
+
+You can also download any version yourself from the [Releases page](https://github.com/AIZay-lmtd/toowholesome-dps-meter/releases).
+
 ## Troubleshooting
 
 | Problem | Fix |
 |---|---|
-| Turning on "Start automatically with AION 2" says "run as administrator" | Close the meter, start it as administrator (step 4), then try again. |
+| "Start automatically with AION 2" turns itself back off | Windows' permission prompt was declined or closed. Turn it on again and click **Yes** on the prompt. |
 | Stuck on "Detecting AION2 connection…" | Make sure the meter runs **as administrator** and Npcap is installed **with WinPcap-compatible mode**. If you use a VPN or ping reducer, the meter should pick the right adapter by itself. Restart the meter after you change any of these. |
 | Your row isn't highlighted, or no PB strip appears | Check your character name in Settings, then hit something so the meter can identify you. |
 | Overlay not visible over the game | Switch AION 2 to Windowed or Borderless mode. |

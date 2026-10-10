@@ -20,8 +20,9 @@ TooWholesome DPS Meter is a fork of [A2Tools DPS Meter](https://github.com/taeng
   - Turn it on in Settings.
   - The meter then starts hidden when you sign in to Windows, as administrator and without a UAC prompt.
   - The overlay appears when the AION 2 window opens and hides about 10 seconds after the game closes.
-  - It uses a Windows Task Scheduler task named "TooWholesome DPS Meter", which is removed when you turn the setting off or uninstall.
+  - It uses a Windows Task Scheduler task named "TooWholesome DPS Meter", which is removed when you turn the setting off or uninstall. Turning it on or off asks for Windows permission once.
   - Opening the meter a second time brings up the copy that's already running instead of starting another one.
+- **Automatic updates.** When a new version is published on GitHub, the meter offers to download and install it. It only installs the download if its checksum matches the one published with the release.
 - **Self-contained.** Online log uploads, a2tools.app sign-in, "send logs to dev" and the upstream donation links are switched off. The meter only talks to npcap.com (if you ask it to install Npcap) and the game's own CDN for skill icons.
 
 ## Install
@@ -38,6 +39,20 @@ npm run tauri build
 ```
 
 The installer is written to `src-tauri/target/release/bundle/msi/`.
+
+## Publishing a new version
+
+1. Bump the version in `package.json`, `src-tauri/Cargo.toml` and `src-tauri/tauri.conf.json`.
+2. Build the installer, and prepare the release files:
+   ```bash
+   npm run tauri build
+   node scripts/release-manifest.mjs
+   ```
+   The script copies the installer to `release/` and writes `release/latest.json`, the file the meter's update check reads.
+3. Commit, push, and publish **both** files (the update check only finds a release that has `latest.json`):
+   ```bash
+   gh release create vX.Y.Z release/TooWholesome-DPS-Meter_X.Y.Z_x64_en-US.msi release/latest.json
+   ```
 
 ## Staying up to date with upstream
 

@@ -378,6 +378,22 @@
                 (REMOVE = "ALL") AND NOT UPGRADINGPRODUCTCODE
             </Custom>
         </InstallExecuteSequence>
+        <!-- TooWholesome DPS: 1.0.0 was "TooWholeDPS Meter". Upgrading keeps the
+             old version's shortcuts (RemoveShortcuts skips upgrades), which
+             then point at a program that is gone. Remove them and the empty
+             old folder. Ignored when they are not there. -->
+        <CustomAction
+            Id="RemoveTooWholeDpsLegacyShortcuts"
+            Return="ignore"
+            Directory="INSTALLDIR"
+            Execute="deferred"
+            Impersonate="no"
+            ExeCommand='"[SystemFolder]cmd.exe" /c del /f /q "[ProgramMenuFolder]TooWholeDPS Meter\TooWholeDPS Meter.lnk" &amp; rd /q "[ProgramMenuFolder]TooWholeDPS Meter" &amp; del /f /q "[DesktopFolder]TooWholeDPS Meter.lnk" &amp; rd /q "[ProgramFiles64Folder]TooWholeDPS Meter"' />
+        <InstallExecuteSequence>
+            <Custom Action="RemoveTooWholeDpsLegacyShortcuts" Before="InstallFinalize">
+                NOT REMOVE
+            </Custom>
+        </InstallExecuteSequence>
         <CustomAction
             Id="DeleteTooWholeLegacyAutostartTask"
             Return="ignore"

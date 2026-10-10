@@ -1,8 +1,10 @@
 (() => {
-  // TooWholesome DPS: no update server yet. Point this at a latest.json of your own
-  // (same shape as upstream's latest-v2.json) to turn update checks on. Never
-  // point it at a2tools.app: that would offer the A2Tools installer instead.
-  const CDN_MANIFEST = "";
+  // TooWholesome DPS: the latest.json attached to the newest GitHub release
+  // (scripts/release-manifest.mjs writes it). GitHub's /releases/latest/
+  // always points at the newest release, so this URL never changes. The
+  // installer it names is only installed if its SHA-256 matches.
+  const CDN_MANIFEST =
+    "https://github.com/AIZay-lmtd/toowholesome-dps-meter/releases/latest/download/latest.json";
   const START_DELAY = 800,
     RETRY = 500,
     LIMIT = 5;

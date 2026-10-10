@@ -27,7 +27,7 @@
     box.addEventListener("change", () => {
       const wanted = box.checked;
       box.disabled = true;
-      say(wanted ? "Setting up…" : "Turning off…");
+      say("If Windows asks for permission, click Yes…");
       invoke("set_launch_with_game", { enabled: wanted })
         .then((on) => {
           box.checked = !!on;
