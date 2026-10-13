@@ -714,6 +714,9 @@
     setOverlayLocked(locked) {
       invoke("set_overlay_locked", { locked: !!locked }).catch(() => {});
     },
+    setLockClickRects(rects, scale) {
+      invoke("set_lock_click_rects", { rects, scale }).catch(() => {});
+    },
     setLockButtonRect(x, y, width, height, scale) {
       invoke("set_lock_button_rect", { x, y, width, height, scale }).catch(() => {});
     },

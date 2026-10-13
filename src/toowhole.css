@@ -507,3 +507,39 @@
   transition: opacity 600ms ease;
 }
 .shareNote.isLeaving { opacity: 0; }
+
+/* Share → Send to Discord: one-time webhook setup inside the menu. */
+.meter.shareOpen:has(.shareSetup:not([hidden])) { min-height: 300px; }
+.shareSetup { display: flex; flex-direction: column; gap: 6px; padding: 6px 9px 8px; }
+.shareSetup[hidden] { display: none; }
+.shareSetupText { font-size: 10.5px; line-height: 1.35; color: rgba(243, 216, 154, 0.75); }
+.shareSetupInput {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 5px 7px;
+  border-radius: 3px;
+  border: 1px solid rgba(232, 196, 106, 0.4);
+  background: rgba(0, 0, 0, 0.45);
+  color: #f6efe0;
+  font: inherit;
+  font-size: 11px;
+}
+.shareSetupInput:focus { outline: none; border-color: var(--pb-gold); }
+.shareSetupError { font-size: 10.5px; color: var(--pb-behind); }
+.shareSetupError:empty { display: none; }
+.shareSetupActions { display: flex; justify-content: flex-end; gap: 8px; }
+.shareSetupActions button,
+.shareChangeWebhook {
+  border: 1px solid rgba(232, 196, 106, 0.4);
+  border-radius: 3px;
+  background: rgba(232, 196, 106, 0.1);
+  color: #f3d89a;
+  font: inherit;
+  font-size: 11px;
+  padding: 3px 9px;
+  cursor: pointer;
+}
+.shareSetupActions .shareSetupCancel { background: none; }
+.shareChangeWebhook { align-self: flex-end; margin: 2px 6px 4px; border: 0; background: none; color: rgba(243, 216, 154, 0.55); }
+.shareChangeWebhook[hidden] { display: none; }
+.shareChangeWebhook:hover { color: #fff1c4; }

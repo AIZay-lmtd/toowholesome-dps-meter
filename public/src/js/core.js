@@ -5508,12 +5508,47 @@ class DpsApp {
     if (show) requestAnimationFrame(() => this._sendLockBtnRect());
   }
 
-  // Where the button is, so the backend keeps it clickable while locked.
+  // What the backend keeps clickable while locked. TooWholesome DPS: every
+  // header button (not only the lock) and any menu or panel that is open, so
+  // Share, History and the rest work without unlocking.
   _sendLockBtnRect() {
     if (!this.lockBtn || this.lockBtn.style.display === "none") return;
-    const r = this.lockBtn.getBoundingClientRect();
-    if (!r.width || !r.height) return;
-    window.javaBridge?.setLockButtonRect?.(r.left, r.top, r.width, r.height, window.devicePixelRatio || 1);
+    const selectors = [
+      ".header .headerBtns",
+      ".shareMenu:not([hidden])",
+      ".pbPanel:not([hidden])",
+      ".settingsPanel.isOpen",
+      ".historyPanel.isOpen",
+      ".historyPanel.open",
+      ".detailsPanel.open",
+    ];
+    const rects = [];
+    for (const el of document.querySelectorAll(selectors.join(","))) {
+      const r = el.getBoundingClientRect();
+      if (r.width && r.height) rects.push([r.left, r.top, r.width, r.height]);
+    }
+    if (!rects.length) return;
+    const key = JSON.stringify([rects, window.devicePixelRatio || 1]);
+    if (key !== this._lastLockRectsKey) {
+      this._lastLockRectsKey = key;
+      window.javaBridge?.setLockClickRects?.(rects, window.devicePixelRatio || 1);
+    }
+    // Re-send when a menu or panel opens or closes, once per frame.
+    if (!this._lockRectObserver) {
+      const meter = document.querySelector(".meter");
+      if (meter) {
+        let queued = false;
+        this._lockRectObserver = new MutationObserver(() => {
+          if (queued) return;
+          queued = true;
+          requestAnimationFrame(() => {
+            queued = false;
+            this._sendLockBtnRect();
+          });
+        });
+        this._lockRectObserver.observe(meter, { attributes: true, attributeFilter: ["class", "hidden"], subtree: true });
+      }
+    }
   }
 
   _setOverlayLocked(locked) {

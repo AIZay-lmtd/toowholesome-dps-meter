@@ -22,7 +22,8 @@ TooWholesome DPS Meter is a fork of [A2Tools DPS Meter](https://github.com/taeng
   - The overlay appears when the AION 2 window opens and hides about 10 seconds after the game closes.
   - It uses a Windows Task Scheduler task named "TooWholesome DPS Meter", which is removed when you turn the setting off or uninstall. Turning it on or off asks for Windows permission once.
   - Opening the meter a second time brings up the copy that's already running instead of starting another one.
-- **Share button.** Copies the fight as one line for party chat (paste in game with Enter, Ctrl+V, Enter) or as a full table for Discord. The meter never types into the game itself.
+- **Share button.** **Send to Discord** posts the fight's table to your party's channel through a webhook you set up once. You can also copy the table or a short line. AION 2's chat doesn't accept a paste, and the meter never types into the game for you (see [docs/MODDING-ROADMAP.md](docs/MODDING-ROADMAP.md)).
+- **Lock (click-through)** lets clicks pass through to the game while every header button stays usable.
 - **Close button.** The power button in the header closes the meter. Hide it in Settings if you don't want it.
 - **Automatic updates.** When a new version is published on GitHub, the meter offers to download and install it. It only installs the download if its checksum matches the one published with the release.
 - **Self-contained.** Online log uploads, a2tools.app sign-in, "send logs to dev" and the upstream donation links are switched off. The meter only talks to npcap.com (if you ask it to install Npcap) and the game's own CDN for skill icons.
@@ -70,6 +71,10 @@ TooWholesome DPS keeps its own changes in a few places to keep merges easy:
 - `public/src/js/personalBests.js`
 - `src-tauri/src/history/personal_bests.rs`
 - small hooks in `app.rs`, `dps_calculator.rs`, `dps_data.rs`, `core.js` and `index.html`
+
+## Where this is going
+
+See **[docs/MODDING-ROADMAP.md](docs/MODDING-ROADMAP.md)**: what can safely be built around AION 2, what would get players banned, and the planned next features.
 
 ## License
 

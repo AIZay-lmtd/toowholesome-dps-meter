@@ -76,7 +76,8 @@ To stop this, turn the setting off. Uninstalling the meter also removes it.
 | Header button | What it does |
 |---|---|
 | ⏻ Power | **Close** the meter |
-| 🔗 Share | Copy the fight for **party chat** (one line: in game press Enter, Ctrl+V, Enter) or as a **full table** for Discord |
+| 🔗 Share | **Send to Discord** (posts the table to your party's channel), or copy the table or a short line to paste anywhere. The first time, it asks for a Discord webhook link: in Discord, open channel settings → Integrations → Webhooks → New Webhook → Copy Webhook URL. |
+| 🔒 Lock | Click-through: your clicks go to the game behind the meter. The header buttons still work, and clicking the lock again unlocks it. |
 | 🏆 Trophy | Your **personal bests**, one per boss, tier and class |
 | 📜 Scroll | **Battle history.** Boss fights are saved automatically. Click one for full details |
 | ↺ Reset | Clear the current fight |

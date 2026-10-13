@@ -1,17 +1,19 @@
 // TooWholesome DPS: the header's Share button.
 //
-// Copies the fight on the meter as text, in one of two shapes:
-//   - Party chat: one short line to paste into the game's chat
-//     (Enter, Ctrl+V, Enter). The meter never types into the game itself:
-//     it only reads traffic, and sending input would change that.
-//   - Discord: a monospaced table with every row the meter shows.
+// Shares the fight on the meter:
+//   - Send to Discord: posts the table to a channel through a webhook the
+//     player sets up once (the party's Discord is where a group talks).
+//   - Copy full table / Copy short line: the same text on the clipboard.
+// AION 2's chat does not take a paste, and the meter never types into the
+// game for you: sending input to the client is what the game's operation
+// policy bans (macros, auto-input programs). It only reads traffic.
 // core.js calls TooWholeShare.onFrame() after each render with what is on
 // screen, so the text always matches the meter.
 (() => {
   const view = window.__A2_VIEW__ || new URLSearchParams(window.location.search).get("view");
   if (view === "settings") return;
 
-  /** Game chat lines are short; stay well inside the limit. */
+  /** Short enough for any chat box. */
   const PARTY_LINE_MAX = 180;
 
   let latest = { rows: [], battleTimeMs: 0, targetLabel: "" };
@@ -85,6 +87,9 @@
   };
 
   // --- UI -------------------------------------------------------------------
+  const invoke = (cmd, args) =>
+    window.__TAURI__?.core?.invoke?.(cmd, args) ?? Promise.reject(new Error("Not available here"));
+
   let menu;
   let note;
 
@@ -101,29 +106,80 @@
     setTimeout(() => mine.remove(), 4200);
   };
 
+  const nothingYet = () => {
+    if (latest.rows.length > 0) return false;
+    say("Nothing to share yet. Hit something first.");
+    return true;
+  };
+
   const copy = async (kind) => {
     toggleMenu(false);
-    if (latest.rows.length === 0) {
-      say("Nothing to share yet. Hit something first.");
-      return;
-    }
-    const text = kind === "party" ? partyLine() : discordTable();
+    if (nothingYet()) return;
+    const text = kind === "line" ? partyLine() : discordTable();
     try {
       // The backend writes the clipboard; the page's clipboard API is the
       // fallback (it can refuse when the overlay is not focused).
-      const invoke = window.__TAURI__?.core?.invoke;
-      if (invoke) {
+      if (window.__TAURI__?.core?.invoke) {
         await invoke("copy_text", { text }).catch(() => navigator.clipboard.writeText(text));
       } else {
         await navigator.clipboard.writeText(text);
       }
-      say(kind === "party"
-        ? "Copied! In game: Enter, Ctrl+V, Enter."
-        : "Copied! Paste it in Discord with Ctrl+V.");
+      say("Copied! Paste it in Discord or any chat app with Ctrl+V.");
     } catch {
       say("Could not copy to the clipboard.");
     }
   };
+
+  const sendToDiscord = async () => {
+    if (nothingYet()) {
+      toggleMenu(false);
+      return;
+    }
+    const has = await invoke("has_discord_webhook").catch(() => false);
+    if (!has) {
+      showSetup();
+      return;
+    }
+    toggleMenu(false);
+    say("Sending to Discord…");
+    invoke("send_to_discord", { content: discordTable() })
+      .then(() => say("Sent to Discord!"))
+      .catch((err) => say(String(err?.message || err || "Could not send to Discord.")));
+  };
+
+  // One-time setup: paste the channel's webhook link.
+  const showSetup = () => {
+    const box = menu.querySelector(".shareSetup");
+    box.hidden = false;
+    menu.querySelector(".shareSetupError").textContent = "";
+    const input = box.querySelector("input");
+    input.value = "";
+    input.focus();
+  };
+
+  const saveSetup = () => {
+    const input = menu.querySelector(".shareSetup input");
+    const error = menu.querySelector(".shareSetupError");
+    const value = input.value.trim();
+    invoke("set_discord_webhook", { url: value })
+      .then(() => {
+        menu.querySelector(".shareSetup").hidden = true;
+        input.value = "";
+        refreshWebhookState();
+        if (value) sendToDiscord();
+        else say("Discord webhook removed.");
+      })
+      .catch((err) => {
+        error.textContent = String(err?.message || err || "Could not save that link.");
+      });
+  };
+
+  const refreshWebhookState = () =>
+    invoke("has_discord_webhook")
+      .then((has) => {
+        if (menu) menu.querySelector(".shareChangeWebhook").hidden = !has;
+      })
+      .catch(() => {});
 
   const ensureMenu = () => {
     if (menu) return menu;
@@ -133,7 +189,7 @@
     menu.className = "shareMenu";
     menu.hidden = true;
     menu.setAttribute("role", "menu");
-    const item = (kind, title, hint) => {
+    const item = (title, hint, onClick) => {
       const b = document.createElement("button");
       b.type = "button";
       b.className = "shareMenuItem";
@@ -145,14 +201,44 @@
       h.className = "shareMenuHint";
       h.textContent = hint;
       b.append(t, h);
-      b.addEventListener("click", () => copy(kind));
+      b.addEventListener("click", onClick);
       return b;
     };
+    const setup = document.createElement("div");
+    setup.className = "shareSetup";
+    setup.hidden = true;
+    setup.innerHTML = `
+      <div class="shareSetupText">Paste your party's Discord webhook link. In Discord: channel settings (gear) → Integrations → Webhooks → New Webhook → Copy Webhook URL.</div>
+      <input type="password" class="shareSetupInput" placeholder="https://discord.com/api/webhooks/…" autocomplete="off" spellcheck="false" />
+      <div class="shareSetupError" role="alert"></div>
+      <div class="shareSetupActions">
+        <button type="button" class="shareSetupCancel">Cancel</button>
+        <button type="button" class="shareSetupSave">Save &amp; send</button>
+      </div>`;
+    setup.querySelector(".shareSetupSave").addEventListener("click", saveSetup);
+    setup.querySelector(".shareSetupCancel").addEventListener("click", () => {
+      setup.hidden = true;
+    });
+    setup.querySelector("input").addEventListener("keydown", (e) => {
+      e.stopPropagation();
+      if (e.key === "Enter") saveSetup();
+      if (e.key === "Escape") setup.hidden = true;
+    });
+    const change = document.createElement("button");
+    change.type = "button";
+    change.className = "shareChangeWebhook";
+    change.hidden = true;
+    change.textContent = "Change Discord webhook";
+    change.addEventListener("click", showSetup);
     menu.append(
-      item("party", "Copy for party chat", "One line: paste in game with Enter, Ctrl+V, Enter"),
-      item("discord", "Copy full table", "Every player's DPS, damage and share, for Discord")
+      item("Send to Discord", "Post the full table to your party's Discord channel", sendToDiscord),
+      setup,
+      item("Copy full table", "Every player's DPS, damage and share, to paste anywhere", () => copy("table")),
+      item("Copy short line", "One line: boss, time and everyone's DPS", () => copy("line")),
+      change
     );
     meter.appendChild(menu);
+    refreshWebhookState();
     return menu;
   };
 
@@ -161,6 +247,7 @@
     if (!m) return;
     const show = typeof force === "boolean" ? force : m.hidden;
     m.hidden = !show;
+    if (!show) m.querySelector(".shareSetup").hidden = true;
     // A class change, so tauriBridge's observer re-fits the overlay window.
     m.classList.toggle("isOpen", show);
     document.querySelector(".meter")?.classList.toggle("shareOpen", show);

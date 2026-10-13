@@ -99,9 +99,11 @@ pub struct AppState {
 #[derive(Default)]
 pub struct OverlayLock {
     locked: std::sync::atomic::AtomicBool,
-    /// The lock button in the main window's page: CSS-pixel x, y, width,
-    /// height, and the page's scale. Sent by the page when it lays out.
-    button: Mutex<Option<(f64, f64, f64, f64, f64)>>,
+    /// What stays clickable while locked, in the main window's page:
+    /// CSS-pixel (x, y, width, height) rects and the page's scale. Sent by the
+    /// page when it lays out. TooWholesome DPS: the whole header button row
+    /// and any open menu or panel, not only the lock button.
+    button: Mutex<Option<(Vec<(f64, f64, f64, f64)>, f64)>>,
     /// Whether the pointer watch is running.
     watching: std::sync::atomic::AtomicBool,
     /// What the window was last told (`true` = ignore the mouse). Every change
@@ -128,13 +130,15 @@ fn sync_click_through(app: &tauri::AppHandle, lock: &OverlayLock, over_button: b
 
 fn pointer_over_lock_button(app: &tauri::AppHandle, lock: &OverlayLock) -> bool {
     let Some((px, py)) = platform::window::cursor_position() else { return false };
-    let Some((x, y, w, h, scale)) = *lock.button.lock() else { return false };
+    let Some((rects, scale)) = lock.button.lock().clone() else { return false };
     let Some(origin) = app.get_webview_window("main").and_then(|m| m.inner_position().ok()) else {
         return false;
     };
-    let (left, top) = (origin.x as f64 + x * scale, origin.y as f64 + y * scale);
     let (px, py) = (px as f64, py as f64);
-    px >= left && px < left + w * scale && py >= top && py < top + h * scale
+    rects.iter().any(|&(x, y, w, h)| {
+        let (left, top) = (origin.x as f64 + x * scale, origin.y as f64 + y * scale);
+        px >= left && px < left + w * scale && py >= top && py < top + h * scale
+    })
 }
 
 /// Lock or unlock the overlay. Locking starts the pointer watch, which ends
@@ -218,6 +222,71 @@ async fn get_fight_history(app: tauri::AppHandle) -> Result<Vec<FightSummary>, S
     crate::blocking::HISTORY.run(move || {
         app.state::<AppState>().fight_history.list_fights()
     }).await
+}
+
+/// TooWholesome DPS: the Discord webhook Share posts to. Kept on this side
+/// only: the page can set it and ask whether there is one, never read it.
+const DISCORD_WEBHOOK_KEY: &str = "toowholesome.discordWebhook";
+
+/// A Discord webhook URL, and nothing else: https on discord.com (or its
+/// canary/ptb/legacy hosts), path /api/webhooks/…, no user, password or port.
+fn is_discord_webhook(url: &str) -> bool {
+    let Ok(u) = reqwest::Url::parse(url.trim()) else { return false };
+    let host = u.host_str().unwrap_or("").to_ascii_lowercase();
+    u.scheme() == "https"
+        && u.username().is_empty()
+        && u.password().is_none()
+        && u.port().is_none()
+        && matches!(host.as_str(), "discord.com" | "canary.discord.com" | "ptb.discord.com" | "discordapp.com")
+        && u.path().starts_with("/api/webhooks/")
+        && u.path().trim_start_matches("/api/webhooks/").contains('/')
+}
+
+#[tauri::command]
+fn set_discord_webhook(state: tauri::State<'_, AppState>, url: String) -> Result<(), String> {
+    let url = url.trim();
+    if !url.is_empty() && !is_discord_webhook(url) {
+        return Err("That isn't a Discord webhook link. It should start with https://discord.com/api/webhooks/".into());
+    }
+    state.settings.set(DISCORD_WEBHOOK_KEY, url);
+    Ok(())
+}
+
+#[tauri::command]
+fn has_discord_webhook(state: tauri::State<'_, AppState>) -> bool {
+    state.settings.get(DISCORD_WEBHOOK_KEY).is_some_and(|u| is_discord_webhook(&u))
+}
+
+/// Post `content` to the saved webhook. Mentions are switched off, so a
+/// player named "@everyone" cannot ping the channel.
+#[tauri::command]
+async fn send_to_discord(state: tauri::State<'_, AppState>, content: String) -> Result<(), String> {
+    let url = state
+        .settings
+        .get(DISCORD_WEBHOOK_KEY)
+        .filter(|u| is_discord_webhook(u))
+        .ok_or("No Discord webhook is set up yet.")?;
+    let content: String = content.chars().take(2000).collect();
+    let body = serde_json::json!({
+        "username": "TooWholesome DPS",
+        "content": content,
+        "allowed_mentions": { "parse": [] },
+    });
+    let response = state
+        .http
+        .post(url.trim())
+        .header("content-type", "application/json")
+        .body(body.to_string())
+        .timeout(Duration::from_secs(15))
+        .send()
+        .await
+        .map_err(|e| format!("Could not reach Discord: {e}"))?;
+    match response.status().as_u16() {
+        200..=299 => Ok(()),
+        401 | 403 | 404 => Err("Discord says this webhook no longer exists. Set it up again.".into()),
+        429 => Err("Discord says slow down. Try again in a few seconds.".into()),
+        code => Err(format!("Discord refused the message (HTTP {code}).")),
+    }
 }
 
 /// TooWholesome DPS: copy text for the Share button.
@@ -918,7 +987,21 @@ fn is_overlay_locked(state: tauri::State<'_, AppState>) -> bool {
 #[tauri::command]
 fn set_lock_button_rect(state: tauri::State<'_, AppState>, x: f64, y: f64, width: f64, height: f64, scale: f64) {
     let scale = if scale.is_finite() && scale > 0.0 { scale } else { 1.0 };
-    *state.overlay_lock.button.lock() = Some((x, y, width, height, scale));
+    *state.overlay_lock.button.lock() = Some((vec![(x, y, width, height)], scale));
+}
+
+/// TooWholesome DPS: everything that stays clickable while locked (the header
+/// buttons and any open menu or panel), as CSS-pixel [x, y, width, height].
+#[tauri::command]
+fn set_lock_click_rects(state: tauri::State<'_, AppState>, rects: Vec<[f64; 4]>, scale: f64) {
+    let scale = if scale.is_finite() && scale > 0.0 { scale } else { 1.0 };
+    let rects = rects
+        .into_iter()
+        .filter(|r| r.iter().all(|v| v.is_finite()) && r[2] > 0.0 && r[3] > 0.0)
+        .take(16)
+        .map(|r| (r[0], r[1], r[2], r[3]))
+        .collect();
+    *state.overlay_lock.button.lock() = Some((rects, scale));
 }
 
 #[tauri::command]
@@ -2957,6 +3040,9 @@ pub fn run() {
             get_personal_bests,
             get_launch_with_game,
             copy_text,
+            set_discord_webhook,
+            has_discord_webhook,
+            send_to_discord,
             set_launch_with_game,
             backfill_personal_bests,
             clear_personal_bests,
@@ -3002,6 +3088,7 @@ pub fn run() {
             set_overlay_locked,
             is_overlay_locked,
             set_lock_button_rect,
+            set_lock_click_rects,
             is_capture_suspended,
             resize_window,
             main_window_ready,
@@ -3038,6 +3125,20 @@ pub fn run() {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn only_discord_webhooks_are_accepted() {
+        use super::is_discord_webhook as ok;
+        assert!(ok("https://discord.com/api/webhooks/123/abcDEF_-"));
+        assert!(ok("https://discordapp.com/api/webhooks/123/abc"));
+        assert!(!ok("http://discord.com/api/webhooks/123/abc"));
+        assert!(!ok("https://discord.com.evil.example/api/webhooks/123/abc"));
+        assert!(!ok("https://user@discord.com/api/webhooks/123/abc"));
+        assert!(!ok("https://discord.com:8443/api/webhooks/123/abc"));
+        assert!(!ok("https://discord.com/api/webhooks/123"));
+        assert!(!ok("https://discord.com/channels/1/2"));
+        assert!(!ok("not a url"));
+    }
+
     use super::*;
 
     #[test]
