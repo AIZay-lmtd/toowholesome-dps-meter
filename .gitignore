@@ -66,3 +66,6 @@ release/
 
 # Npcap installers may not be redistributed
 npcap-*.exe
+
+# Personal files that live in this folder but are not part of the project
+/watch.htm

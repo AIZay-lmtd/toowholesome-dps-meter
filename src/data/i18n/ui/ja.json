@@ -228,7 +228,7 @@
     "roundDps": "DPSを丸める",
     "showDpsSuffix": "DPSの後に/sを表示",
     "autoHideMeter": "メーターを自動的に隠す",
-    "showSuspendBtn": "一時停止ボタンを表示",
+    "showSuspendBtn": "閉じるボタンを表示",
     "showLockBtn": "ロックボタンを表示（クリック透過）",
     "playerLimit": {
       "label": "表示する最大プレイヤー数"

@@ -233,7 +233,7 @@
     "roundDps": "Округлять DPS",
     "showDpsSuffix": "Показывать /s после DPS",
     "autoHideMeter": "Автоматически скрывать счётчик",
-    "showSuspendBtn": "Показывать кнопку паузы",
+    "showSuspendBtn": "Показывать кнопку закрытия",
     "showLockBtn": "Показывать кнопку блокировки (клики насквозь)",
     "playerLimit": {
       "label": "Макс. игроков на экране"

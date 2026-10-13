@@ -45,6 +45,8 @@ mod npcap_setup;
 mod app;
 #[cfg(feature = "desktop")]
 mod autostart;
+#[cfg(feature = "desktop")]
+mod clipboard_text;
 
 #[cfg(feature = "desktop")]
 mod atomic_file;

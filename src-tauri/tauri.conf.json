@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "TooWholesome DPS Meter",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "identifier": "com.toowhole.dps-meter",
   "mainBinaryName": "TooWholesome-DPS-Meter",
   "build": {

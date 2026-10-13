@@ -220,6 +220,12 @@ async fn get_fight_history(app: tauri::AppHandle) -> Result<Vec<FightSummary>, S
     }).await
 }
 
+/// TooWholesome DPS: copy text for the Share button.
+#[tauri::command]
+fn copy_text(text: String) -> Result<(), String> {
+    crate::clipboard_text::copy(&text)
+}
+
 /// TooWholesome DPS: whether the meter starts with Windows and waits for AION 2.
 #[tauri::command]
 async fn get_launch_with_game() -> bool {
@@ -2950,6 +2956,7 @@ pub fn run() {
             get_fight_history,
             get_personal_bests,
             get_launch_with_game,
+            copy_text,
             set_launch_with_game,
             backfill_personal_bests,
             clear_personal_bests,

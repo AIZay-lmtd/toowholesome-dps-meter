@@ -60,7 +60,8 @@
 
           <div class="headerBtns">
             <div class="headerBtn lockBtn" style="display:none" role="button" tabindex="0" aria-label="Lock overlay (click-through)" data-i18n-aria-label="settings.showLockBtn"><i data-lucide="lock-open"></i></div>
-            <div class="headerBtn suspendBtn" style="display:none"><i data-lucide="power"></i></div>
+            <div class="headerBtn shareBtn" role="button" tabindex="0" aria-label="Share damage" title="Share damage"><i data-lucide="share-2"></i></div>
+            <div class="headerBtn suspendBtn" style="display:none" role="button" tabindex="0" aria-label="Close the meter" title="Close the meter"><i data-lucide="power"></i></div>
             <div class="headerBtn pbBtn" role="button" tabindex="0" aria-label="Personal bests" title="Personal bests"><i data-lucide="trophy"></i></div>
             <div class="headerBtn historyBtn" role="button" tabindex="0" aria-label="Fight history" data-i18n-aria-label="history.title"><i data-lucide="scroll-text"></i></div>
             <div class="headerBtn resetBtn"><i data-lucide="rotate-ccw"></i></div>
@@ -722,7 +723,7 @@
                     </span>
                   </label>
                   <label class="settingsToggle">
-                    <span class="settingsToggleLabel settingsLabel" data-i18n="settings.showSuspendBtn">Show suspend button</span>
+                    <span class="settingsToggleLabel settingsLabel" data-i18n="settings.showSuspendBtn">Show close button</span>
                     <span class="settingsToggleControl">
                       <input type="checkbox" class="showSuspendBtnCheckbox" />
                       <span class="settingsToggleTrack" aria-hidden="true"></span>
@@ -1276,5 +1277,6 @@
     <script src="/src/js/core.js?v=2018a"></script>
     <script src="/src/js/personalBests.js"></script>
     <script src="/src/js/launchWithGame.js"></script>
+    <script src="/src/js/shareDamage.js"></script>
   </body>
 </html>

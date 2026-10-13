@@ -22,6 +22,8 @@ TooWholesome DPS Meter is a fork of [A2Tools DPS Meter](https://github.com/taeng
   - The overlay appears when the AION 2 window opens and hides about 10 seconds after the game closes.
   - It uses a Windows Task Scheduler task named "TooWholesome DPS Meter", which is removed when you turn the setting off or uninstall. Turning it on or off asks for Windows permission once.
   - Opening the meter a second time brings up the copy that's already running instead of starting another one.
+- **Share button.** Copies the fight as one line for party chat (paste in game with Enter, Ctrl+V, Enter) or as a full table for Discord. The meter never types into the game itself.
+- **Close button.** The power button in the header closes the meter. Hide it in Settings if you don't want it.
 - **Automatic updates.** When a new version is published on GitHub, the meter offers to download and install it. It only installs the download if its checksum matches the one published with the release.
 - **Self-contained.** Online log uploads, a2tools.app sign-in, "send logs to dev" and the upstream donation links are switched off. The meter only talks to npcap.com (if you ask it to install Npcap) and the game's own CDN for skill icons.
 

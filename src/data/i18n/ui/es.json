@@ -228,7 +228,7 @@
     "roundDps": "Redondear DPS",
     "showDpsSuffix": "Mostrar /s tras el DPS",
     "autoHideMeter": "Ocultar el medidor automáticamente",
-    "showSuspendBtn": "Mostrar botón de pausa",
+    "showSuspendBtn": "Mostrar botón de cerrar",
     "showLockBtn": "Mostrar botón de bloqueo (clic a través)",
     "playerLimit": {
       "label": "Máx. jugadores mostrados"

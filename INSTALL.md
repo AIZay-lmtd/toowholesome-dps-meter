@@ -75,6 +75,8 @@ To stop this, turn the setting off. Uninstalling the meter also removes it.
 
 | Header button | What it does |
 |---|---|
+| ⏻ Power | **Close** the meter |
+| 🔗 Share | Copy the fight for **party chat** (one line: in game press Enter, Ctrl+V, Enter) or as a **full table** for Discord |
 | 🏆 Trophy | Your **personal bests**, one per boss, tier and class |
 | 📜 Scroll | **Battle history.** Boss fights are saved automatically. Click one for full details |
 | ↺ Reset | Clear the current fight |

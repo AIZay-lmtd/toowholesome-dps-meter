@@ -233,7 +233,7 @@
     "roundDps": "DPS取整",
     "showDpsSuffix": "在 DPS 后显示 /s",
     "autoHideMeter": "自动隐藏面板",
-    "showSuspendBtn": "显示暂停按钮",
+    "showSuspendBtn": "显示关闭按钮",
     "showLockBtn": "显示锁定按钮（点击穿透）",
     "playerLimit": {
       "label": "最大显示人数"

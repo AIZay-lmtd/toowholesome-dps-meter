@@ -238,7 +238,7 @@
     "roundDps": "Round DPS",
     "showDpsSuffix": "Show /s after DPS",
     "autoHideMeter": "Auto-hide meter",
-    "showSuspendBtn": "Show suspend button",
+    "showSuspendBtn": "Show close button",
     "showLockBtn": "Show lock button (click-through)",
     "playerLimit": {
       "label": "Max players shown"

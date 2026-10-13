@@ -228,7 +228,7 @@
     "roundDps": "DPS runden",
     "showDpsSuffix": "/s nach DPS anzeigen",
     "autoHideMeter": "Meter automatisch ausblenden",
-    "showSuspendBtn": "Pause-Schaltfläche anzeigen",
+    "showSuspendBtn": "Schließen-Knopf anzeigen",
     "showLockBtn": "Sperrtaste anzeigen (durchklickbar)",
     "playerLimit": {
       "label": "Max. angezeigte Spieler"

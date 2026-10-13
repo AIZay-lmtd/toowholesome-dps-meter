@@ -1329,6 +1329,7 @@ class DpsApp {
       pbDungeonId: targetPbDungeonId,
       battleTimeMs,
     });
+    window.TooWholeShare?.onFrame?.({ rows: rowsToRender, battleTimeMs, targetLabel: nextTargetLabel });
   }
 
   buildRowsFromPayload(raw) {
@@ -2106,8 +2107,10 @@ class DpsApp {
     this.resetBtn?.addEventListener("click", () => {
       this.refreshDamageData({ reason: "manual refresh" });
     });
+    // TooWholesome DPS: the power button closes the meter (it used to pause
+    // counting, which looked like closing but left it running).
     this.suspendBtn?.addEventListener("click", () => {
-      this._setCaptureSuspended(!this._captureSuspended);
+      window.javaBridge?.exitApp?.();
     });
     this.lockBtn?.addEventListener("click", () => {
       this._setOverlayLocked(!this._overlayLocked);
@@ -2556,7 +2559,8 @@ class DpsApp {
     }
     // Suspend button setting
     if (this.showSuspendBtnCheckbox) {
-      const storedShow = this.safeGetSetting(this.storageKeys.showSuspendBtn) === "true";
+      // TooWholesome DPS: it is the close button now, shown unless turned off.
+      const storedShow = this.safeGetSetting(this.storageKeys.showSuspendBtn) !== "false";
       this.showSuspendBtnCheckbox.checked = storedShow;
       this._applySuspendBtnVisibility(storedShow);
       this.showSuspendBtnCheckbox.addEventListener("change", (event) => {
