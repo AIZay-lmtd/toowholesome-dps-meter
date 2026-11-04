@@ -47,6 +47,12 @@ pub fn get_pet_nearby() -> Vec<Nearby> {
     NAV.lock().nearby(crate::clock::now_ms())
 }
 
+/// Which pet each monster's souls go to, so the overlay can follow what you hunt.
+#[tauri::command]
+pub fn get_pet_sources() -> HashMap<i32, i32> {
+    PET_SOURCES.clone()
+}
+
 pub fn is_pet(id: i32) -> bool {
     CATALOG.iter().any(|p| p.id == id)
 }

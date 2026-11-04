@@ -25,7 +25,7 @@ TooWholesome DPS Meter is a fork of [A2Tools DPS Meter](https://github.com/taeng
 The companion features sit in the strip under the title:
 - **Checklist.** Dailies, weeklies and event limits for each character. Where the game reports a count, the row fills itself and shows **auto**: entries and keys, Odyle Energy, Nightmare, Daily Dungeon, Ascension Trial, arena matches and wins, the duty board, and Command shop limits. Everything else you tick by hand. Rows clear at the daily (07:00 UTC) and weekly (Wednesday) reset, and stocks show when they'll be full.
 - **Events.** Countdowns to the Shugo Festival, Black Cloud Merchant, Spacetime Rift, Dimensional Invasion, Watcher Kaira, Artifact Siege and its bosses, Guardian Lord Nahma, and the resets. Times follow your region's server clock, daylight saving included, and you can turn on a chime and banner alert per event.
-- **Pets.** Your pet collection, read from the game's traffic with nothing to type in. Click a pet for where its souls drop and a live arrow to its monsters when they are near you.
+- **Pets.** Your pet collection, read from the game's traffic with nothing to type in. Click a pet for where its souls drop and a live arrow to its monsters when they are near you. Pin one under the strip, or let it follow whatever pet monster you are attacking ("Track my hunt"); pets you hunt lead the In progress list.
   - Every pet's portrait, rank and souls toward the next rank, how many you've collected, and how far you are from the next collection reward.
   - A notice appears when a pet ranks up.
   - **Nearby** lists the pets you still need whose monsters are around you, nearest first, with a direction arrow and an approximate distance. These update for a couple of seconds after each skill you use.

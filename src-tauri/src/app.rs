@@ -3049,6 +3049,7 @@ pub fn run() {
             get_personal_bests,
             crate::pets::get_pets,
             crate::pets::get_pet_nearby,
+            crate::pets::get_pet_sources,
             crate::checklist::get_checklist_game,
             get_launch_with_game,
             copy_text,

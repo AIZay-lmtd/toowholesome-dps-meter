@@ -4,7 +4,10 @@
 // the next one. Clicking a pet opens its page: which monsters drop its souls
 // and where (assets/pets/guide.json, from PetTracker by 0Fox2Give, GPL-3.0,
 // drop data from aion2maps.com), and a live arrow while they are around you.
-// A notice shows when a pet ranks up.
+// A notice shows when a pet ranks up. Pets whose monsters you have attacked
+// lately ("hunting") lead the In progress list, and one pet can be pinned
+// under the strip with its souls and arrow: a chosen one, or "auto", which
+// follows whatever you are hunting.
 (() => {
   const view = window.__A2_VIEW__ || new URLSearchParams(window.location.search).get("view");
   if (view === "settings") return;
@@ -23,12 +26,36 @@
 
   let data = null;
   let nearby = [];
-  let nearbyTimer = 0;
   let filter = "todo";
   let search = "";
   let panel;
   let selected = null;
   let guide = null;
+  let sources = null;
+  let bar;
+
+  /** A pet counts as hunted for this long after you last hit one of its monsters. */
+  const RECENT_MS = 30 * 60_000;
+  const PIN_KEY = "toowholesome.petPin";
+  const RECENT_KEY = "toowholesome.petRecent";
+  const getSetting = (key) => {
+    try {
+      return window.javaBridge?.getSetting?.(key) ?? "";
+    } catch {
+      return "";
+    }
+  };
+  const setSetting = (key, value) => window.javaBridge?.setSetting?.(key, value);
+  // "" (none), "auto" (follow your hunt) or a pet id.
+  let pin = "";
+  // petId -> when you last hit one of its monsters or gained its souls.
+  const recent = new Map();
+  let recentSavedAt = 0;
+
+  const huntedAt = (id) => {
+    const at = recent.get(id);
+    return at && Date.now() - at < RECENT_MS ? at : 0;
+  };
 
   const remaining = (p) => (p.goal == null ? Infinity : Math.max(0, p.goal - p.souls));
   const rankLabel = (p) => (p.rank == null ? "?" : p.rank === 0 ? "—" : p.rank >= 3 ? "MAX" : `R${p.rank}`);
@@ -41,9 +68,12 @@
         filter === "all" ? true
           : filter === "max" ? p.rank >= 3
           : filter === "missing" ? p.rank === 0
-          : p.rank != null && p.rank < 3 && (p.rank > 0 || p.souls > 0)
+          : p.rank != null && p.rank < 3 && (p.rank > 0 || p.souls > 0 || huntedAt(p.id) > 0)
       )
-      .sort((a, b) => (filter === "todo" ? remaining(a) - remaining(b) : 0) || a.name.localeCompare(b.name));
+      .sort((a, b) =>
+        (filter === "todo" ? huntedAt(b.id) - huntedAt(a.id) || remaining(a) - remaining(b) : 0) ||
+        a.name.localeCompare(b.name)
+      );
   };
 
   const render = () => {
@@ -69,7 +99,7 @@
     }
     for (const p of rows.slice(0, 150)) {
       const row = document.createElement("div");
-      row.className = "petRow" + (p.id === data.equipped ? " isEquipped" : "");
+      row.className = "petRow" + (p.id === data.equipped ? " isEquipped" : "") + (huntedAt(p.id) ? " isHunting" : "");
       clickable(row, p.id);
       const portrait = document.createElement("img");
       portrait.className = "petPortrait";
@@ -84,21 +114,28 @@
       name.textContent = p.name + (p.id === data.equipped ? " ★" : "");
       const meta = document.createElement("div");
       meta.className = "pbItemMeta";
-      meta.textContent = p.goal == null
-        ? `${p.family} · maxed`
-        : `${p.family} · ${p.souls}/${p.goal} souls${p.rank === 0 ? " to unlock" : ` to R${p.rank + 1}`}`;
-      const bar = document.createElement("div");
-      bar.className = "petBar";
-      const fill = document.createElement("div");
-      fill.style.width = p.goal == null ? "100%" : `${Math.min(100, (p.souls / p.goal) * 100)}%`;
-      bar.appendChild(fill);
-      text.append(name, meta, bar);
+      meta.textContent = (huntedAt(p.id) ? "Hunting · " : "") + soulsText(p);
+      text.append(name, meta, soulsBar(p));
       const rank = document.createElement("div");
       rank.className = "petRank" + (p.rank >= 3 ? " isMax" : "");
       rank.textContent = rankLabel(p);
       row.append(portrait, text, rank);
       list.appendChild(row);
     }
+  };
+
+  const soulsText = (p) =>
+    p.goal == null
+      ? `${p.family} · maxed`
+      : `${p.family} · ${p.souls}/${p.goal} souls${p.rank === 0 ? " to unlock" : ` to R${p.rank + 1}`}`;
+
+  const soulsBar = (p) => {
+    const bar = document.createElement("div");
+    bar.className = "petBar";
+    const fill = document.createElement("div");
+    fill.style.width = p.goal == null ? "100%" : `${Math.min(100, (p.souls / p.goal) * 100)}%`;
+    bar.appendChild(fill);
+    return bar;
   };
 
   // shortcut: assumes the game's units are Unreal centimetres (unverified); recalibrate if distances look off.
@@ -132,13 +169,7 @@
       name.textContent = p?.name ?? `Pet #${n.petId}`;
       const arrow = document.createElement("div");
       arrow.className = "petArrow";
-      if (n.bearing == null) {
-        arrow.textContent = "·";
-        arrow.title = "Use a skill to update your position";
-      } else {
-        arrow.textContent = "↑";
-        arrow.style.transform = `rotate(${n.bearing}deg)`;
-      }
+      pointArrow(arrow, n);
       const dist = document.createElement("div");
       dist.className = "petDistance";
       dist.textContent = n.distance == null ? "nearby" : metres(n.distance);
@@ -201,6 +232,17 @@
       <div class="petDetailSection petDrops" hidden><div class="petsNearbyTitle">Souls drop from</div></div>
       <div class="petMaps"></div>`;
     box.querySelector(".petBack").addEventListener("click", closePet);
+    const pinBtn = document.createElement("button");
+    pinBtn.type = "button";
+    pinBtn.className = "petMapBtn petPinBtn";
+    const pinned = pin === String(p.id);
+    pinBtn.textContent = pinned ? "Unpin from meter" : "📌 Pin to meter";
+    pinBtn.title = "Keep this pet's souls and arrow on the meter with the panel closed";
+    pinBtn.addEventListener("click", () => {
+      setPin(pinned ? "" : String(p.id));
+      renderDetail();
+    });
+    box.querySelector(".petMaps").appendChild(pinBtn);
     const img = box.querySelector(".petBig");
     img.src = `./assets/pets/${p.id}.png`;
     img.onerror = () => img.classList.add("isMissing");
@@ -242,6 +284,131 @@
     renderCompass();
   };
 
+  const pointArrow = (arrow, n) => {
+    if (n?.bearing == null) {
+      arrow.textContent = "·";
+      arrow.title = "Use a skill to update your position";
+      arrow.style.transform = "";
+    } else {
+      arrow.textContent = "↑";
+      arrow.title = "Map direction, north up";
+      arrow.style.transform = `rotate(${n.bearing}deg)`;
+    }
+  };
+
+  // The pinned pet: the chosen one, or in auto the one you hunted last.
+  const pinnedPet = () => {
+    if (!pin || !data) return null;
+    if (pin !== "auto") return data.pets.find((p) => String(p.id) === pin) ?? null;
+    let best = null;
+    for (const p of data.pets) {
+      if (p.rank >= 3 || !huntedAt(p.id)) continue;
+      if (!best || huntedAt(p.id) > huntedAt(best.id)) best = p;
+    }
+    return best;
+  };
+
+  // The pinned pet under the strip.
+  const renderBar = () => {
+    if (!bar) return;
+    const p = pinnedPet();
+    const show = !!pin && !!data?.syncedAtMs;
+    if (bar.hidden === show) bar.hidden = !show;
+    document.querySelector(".meter")?.classList.toggle("petPinned", show);
+    if (!show) return;
+    bar.dataset.petId = p ? p.id : "";
+    const img = bar.querySelector(".petPortrait");
+    const name = bar.querySelector(".pbItemBoss");
+    const meta = bar.querySelector(".pbItemMeta");
+    const arrow = bar.querySelector(".petArrow");
+    const dist = bar.querySelector(".petDistance");
+    if (!p) {
+      img.classList.add("isMissing");
+      img.removeAttribute("src");
+      name.textContent = "Tracking your hunt";
+      meta.textContent = "Attack a monster that drops pet souls";
+      bar.querySelector(".petBar > div").style.width = "0%";
+      arrow.textContent = "";
+      dist.textContent = "";
+      return;
+    }
+    const src = `./assets/pets/${p.id}.png`;
+    if (img.getAttribute("src") !== src) {
+      img.classList.remove("isMissing");
+      img.src = src;
+    }
+    name.textContent = (pin === "auto" ? "Hunting: " : "") + p.name;
+    meta.textContent = soulsText(p);
+    bar.querySelector(".petBar > div").style.width = p.goal == null ? "100%" : `${Math.min(100, (p.souls / p.goal) * 100)}%`;
+    const n = nearby.find((x) => x.petId === p.id);
+    pointArrow(arrow, n);
+    if (!n) arrow.textContent = "";
+    dist.textContent = !n ? "not near" : n.distance == null ? "nearby" : metres(n.distance);
+  };
+
+  const ensureBar = () => {
+    if (bar) return bar;
+    const strip = document.querySelector(".toolStrip");
+    if (!strip) return null;
+    bar = document.createElement("div");
+    bar.className = "petPin";
+    bar.hidden = true;
+    bar.setAttribute("data-no-drag", "");
+    bar.setAttribute("role", "button");
+    bar.tabIndex = 0;
+    bar.title = "Open this pet's page";
+    bar.innerHTML = `
+      <img class="petPortrait" alt="" />
+      <div class="pbItemText"><div class="pbItemBoss"></div><div class="pbItemMeta"></div><div class="petBar"><div></div></div></div>
+      <div class="petArrow"></div>
+      <div class="petDistance"></div>
+      <button type="button" class="petPinClose" aria-label="Unpin" title="Unpin">✕</button>`;
+    bar.querySelector(".petPortrait").onerror = (e) => e.target.classList.add("isMissing");
+    bar.querySelector(".petPinClose").addEventListener("click", (e) => {
+      e.stopPropagation();
+      setPin("");
+    });
+    const open = () => {
+      const id = Number(bar.dataset.petId);
+      toggle(true);
+      if (id) openPet(id);
+    };
+    bar.addEventListener("click", open);
+    bar.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        open();
+      }
+    });
+    strip.after(bar);
+    return bar;
+  };
+
+  const setPin = (value) => {
+    pin = value;
+    setSetting(PIN_KEY, value);
+    panel?.querySelector(".petAutoBtn")?.setAttribute("aria-pressed", String(pin === "auto"));
+    if (pin && !data) load();
+    renderBar();
+  };
+
+  // You hit one of this pet's monsters, or gained its souls.
+  const hunted = (id) => {
+    const before = huntedAt(id);
+    const now = Date.now();
+    recent.set(id, now);
+    if (now - recentSavedAt > 30_000 || !before) {
+      recentSavedAt = now;
+      const kept = {};
+      for (const [k, at] of recent) if (now - at < RECENT_MS) kept[k] = at;
+      setSetting(RECENT_KEY, JSON.stringify(kept));
+    }
+    if (before) return;
+    // A newly hunted pet moves to the top of In progress and into an auto pin.
+    renderBar();
+    if (panel && !panel.hidden && selected == null) render();
+  };
+
   const renderCompass = () => {
     const box = panel?.querySelector(".petCompass");
     if (!box || selected == null) return;
@@ -256,13 +423,11 @@
     box.className = "petCompass";
     box.innerHTML = '<div class="petArrow petBigArrow"></div><div><div class="petBigDistance"></div><div class="pbItemMeta"></div></div>';
     const arrow = box.querySelector(".petArrow");
+    pointArrow(arrow, n);
     if (n.bearing == null) {
-      arrow.textContent = "·";
       box.querySelector(".petBigDistance").textContent = "In range";
       box.querySelector(".pbItemMeta").textContent = "Use any skill to update your position and get the arrow.";
     } else {
-      arrow.textContent = "↑";
-      arrow.style.transform = `rotate(${n.bearing}deg)`;
       box.querySelector(".petBigDistance").textContent = `${metres(n.distance)} away`;
       box.querySelector(".pbItemMeta").textContent = "Nearest one, as on your map (north is up). Use a skill now and then to keep it fresh.";
     }
@@ -272,6 +437,8 @@
     invoke("get_pet_nearby")
       .then((list) => {
         nearby = Array.isArray(list) ? list : [];
+        renderBar();
+        if (!panel || panel.hidden) return;
         if (selected != null) renderCompass();
         else renderNearby();
       })
@@ -281,6 +448,7 @@
     invoke("get_pets")
       .then((v) => {
         data = v;
+        renderBar();
         if (selected != null) return renderDetail();
         render();
         renderNearby();
@@ -304,6 +472,7 @@
       <div class="petsControls">
         <input type="search" class="petsSearch" placeholder="Search pets or family…" spellcheck="false" />
         <div class="petsFilters" role="group"></div>
+        <button type="button" class="petAutoBtn" title="Pin whichever pet you are hunting to the meter, with its souls and arrow">📌 Track my hunt</button>
       </div>
       <div class="pbPanelList petsList"></div>
       <div class="pbPanelList petDetail"></div>`;
@@ -321,6 +490,9 @@
       });
       filters.appendChild(b);
     }
+    const auto = panel.querySelector(".petAutoBtn");
+    auto.setAttribute("aria-pressed", String(pin === "auto"));
+    auto.addEventListener("click", () => setPin(pin === "auto" ? "" : "auto"));
     const input = panel.querySelector(".petsSearch");
     input.addEventListener("input", () => {
       search = input.value;
@@ -344,8 +516,6 @@
     const show = typeof force === "boolean" ? force : p.hidden;
     if (show) load();
     p.hidden = !show;
-    clearInterval(nearbyTimer);
-    if (show) nearbyTimer = setInterval(pollNearby, 500);
     // Class changes re-fit the overlay window (tauriBridge) and the lock's click area (core.js).
     p.classList.toggle("isOpen", show);
     document.querySelector(".meter")?.classList.toggle("petsOpen", show);
@@ -365,6 +535,19 @@
   };
 
   const start = () => {
+    pin = getSetting(PIN_KEY) || "";
+    try {
+      for (const [id, at] of Object.entries(JSON.parse(getSetting(RECENT_KEY) || "{}"))) recent.set(Number(id), at);
+    } catch {}
+    ensureBar();
+    load();
+    invoke("get_pet_sources")
+      .then((map) => (sources = map || {}))
+      .catch(() => {});
+    // Positions only matter while something shows them.
+    setInterval(() => {
+      if ((panel && !panel.hidden) || pin) pollNearby();
+    }, 500);
     const btn = document.querySelector(".petsBtn");
     btn?.addEventListener("click", () => toggle());
     btn?.addEventListener("keydown", (e) => {
@@ -376,8 +559,17 @@
     tauri?.event?.listen?.("pets-changed", (event) => {
       const n = event?.payload;
       if (n?.kind === "rank") notice(`${n.name} reached ${n.rank >= 3 ? "MAX rank" : `rank ${n.rank}`}`);
-      if (panel && !panel.hidden) load();
+      if (n?.kind === "souls" && n.id) hunted(Number(n.id));
+      if ((panel && !panel.hidden) || pin) load();
     });
+  };
+
+  // Each meter frame (core.js): the monster you are fighting.
+  window.TooWholePets = {
+    onFrame({ mobCode } = {}) {
+      const pet = mobCode && sources?.[mobCode];
+      if (pet && Date.now() - (recent.get(pet) ?? 0) > 5000) hunted(pet);
+    },
   };
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start, { once: true });

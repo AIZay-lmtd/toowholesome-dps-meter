@@ -1330,6 +1330,7 @@ class DpsApp {
       battleTimeMs,
     });
     window.TooWholeShare?.onFrame?.({ rows: rowsToRender, battleTimeMs, targetLabel: nextTargetLabel });
+    window.TooWholePets?.onFrame?.({ mobCode: targetMobCode });
   }
 
   buildRowsFromPayload(raw) {
@@ -5316,7 +5317,7 @@ class DpsApp {
       if (targetEl?.closest?.(".resizeHandle")) {
         return;
       }
-      if (targetEl?.closest?.(".headerBtn, .footerBtn, .bossIcon, .toolBtn")) {
+      if (targetEl?.closest?.(".headerBtn, .footerBtn, .bossIcon, .toolBtn, .petPin")) {
         return;
       }
       if (targetEl?.closest?.(".settingsPanel, .historyPanel, .detailsBody, .detailsSettingsMenu, .pbPanel, .shareMenu")) {
@@ -5516,6 +5517,7 @@ class DpsApp {
     const selectors = [
       ".header .headerBtns",
       ".toolStrip",
+      ".petPin:not([hidden])",
       ".shareMenu:not([hidden])",
       ".pbPanel:not([hidden])",
       ".petsPanel:not([hidden])",
