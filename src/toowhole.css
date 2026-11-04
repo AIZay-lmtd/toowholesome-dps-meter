@@ -582,6 +582,36 @@
 .petNearby .pbItemBoss { flex: 1; min-width: 0; }
 .petArrow { width: 22px; text-align: center; font-size: 17px; font-weight: 700; color: var(--pb-ahead); transition: transform 300ms ease; }
 .petDistance { min-width: 48px; text-align: right; font-family: var(--hud-tech); font-size: 11.5px; color: #fff4d6; }
+.petRow, .petNearby { cursor: pointer; }
+.petRow:hover, .petNearby:hover, .petRow:focus-visible, .petNearby:focus-visible { background: rgba(232, 196, 106, 0.1); outline: none; }
+
+/* One pet's page. */
+.petsPanel:not(.isDetail) .petDetail,
+.petsPanel.isDetail .petsSummary,
+.petsPanel.isDetail .petsNearby,
+.petsPanel.isDetail .petsControls,
+.petsPanel.isDetail .petsList { display: none; }
+.petDetail { padding: 6px 8px; }
+.petBack { border: 0; background: none; color: var(--pb-gold); font: inherit; font-size: 11px; cursor: pointer; padding: 0 0 6px; }
+.petDetailHead { display: flex; align-items: center; gap: 10px; }
+.petDetailHead .pbItemText { flex: 1; min-width: 0; }
+.petBig { width: 56px; height: 56px; flex-basis: 56px; }
+.petCompass { display: flex; align-items: center; gap: 12px; margin: 8px 0; padding: 8px 10px; border: 1px solid rgba(232, 196, 106, 0.35); border-radius: 4px; background: rgba(232, 196, 106, 0.07); }
+.petCompass[hidden] { display: none; }
+.petCompass.isAway { font-size: 11px; color: rgba(243, 216, 154, 0.7); }
+.petCompass > div:last-child { flex: 1; min-width: 0; }
+.petCompass .pbItemMeta { white-space: normal; }
+.petBigArrow { flex: 0 0 40px; width: 40px; font-size: 34px; line-height: 40px; }
+.petBigDistance { font-family: var(--hud-tech); font-size: 16px; font-weight: 700; color: #fff4d6; }
+.petDetailSection { margin-top: 6px; font-size: 11px; color: rgba(246, 239, 224, 0.85); }
+.petDetailSection[hidden] { display: none; }
+.petDrop { display: flex; justify-content: space-between; gap: 8px; padding: 2px 0; border-bottom: 1px solid rgba(232, 196, 106, 0.08); }
+.petRegion { color: rgba(243, 216, 154, 0.6); white-space: nowrap; }
+.petMaps { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+.petMapBtn {
+  border: 1px solid rgba(232, 196, 106, 0.4); border-radius: 10px; background: rgba(232, 196, 106, 0.1);
+  color: #fff1c4; font: inherit; font-size: 10.5px; padding: 2px 9px; cursor: pointer;
+}
 
 /* World & Events timers (every theme). */
 .meter.timersOpen { min-height: 470px; }

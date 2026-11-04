@@ -1,7 +1,10 @@
 // TooWholesome DPS: the pet collection, read from the game's traffic
 // (src-tauri/src/pets.rs). The paw button opens the list: collected count,
 // the next collection reward, and every pet with its rank and souls toward
-// the next one. A notice shows when a pet ranks up.
+// the next one. Clicking a pet opens its page: which monsters drop its souls
+// and where (assets/pets/guide.json, from PetTracker by 0Fox2Give, GPL-3.0,
+// drop data from aion2maps.com), and a live arrow while they are around you.
+// A notice shows when a pet ranks up.
 (() => {
   const view = window.__A2_VIEW__ || new URLSearchParams(window.location.search).get("view");
   if (view === "settings") return;
@@ -24,6 +27,8 @@
   let filter = "todo";
   let search = "";
   let panel;
+  let selected = null;
+  let guide = null;
 
   const remaining = (p) => (p.goal == null ? Infinity : Math.max(0, p.goal - p.souls));
   const rankLabel = (p) => (p.rank == null ? "?" : p.rank === 0 ? "—" : p.rank >= 3 ? "MAX" : `R${p.rank}`);
@@ -65,6 +70,7 @@
     for (const p of rows.slice(0, 150)) {
       const row = document.createElement("div");
       row.className = "petRow" + (p.id === data.equipped ? " isEquipped" : "");
+      clickable(row, p.id);
       const portrait = document.createElement("img");
       portrait.className = "petPortrait";
       portrait.alt = "";
@@ -115,6 +121,7 @@
       const p = byId.get(n.petId);
       const row = document.createElement("div");
       row.className = "petNearby";
+      clickable(row, n.petId);
       const img = document.createElement("img");
       img.className = "petPortrait";
       img.alt = "";
@@ -140,11 +147,133 @@
     }
   };
 
+  const clickable = (el, id) => {
+    el.tabIndex = 0;
+    el.setAttribute("role", "button");
+    el.addEventListener("click", () => openPet(id));
+    el.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        openPet(id);
+      }
+    });
+  };
+
+  const loadGuide = () =>
+    guide
+      ? Promise.resolve(guide)
+      : fetch("./assets/pets/guide.json")
+          .then((r) => r.json())
+          .catch(() => ({}))
+          .then((g) => (guide = g));
+
+  const openPet = (id) => {
+    selected = id;
+    loadGuide().then(renderDetail);
+  };
+
+  const closePet = () => {
+    selected = null;
+    panel?.classList.remove("isDetail");
+    render();
+    renderNearby();
+  };
+
+  // One pet's page. The compass alone is redrawn on every poll.
+  const renderDetail = () => {
+    const box = panel?.querySelector(".petDetail");
+    const p = data?.pets.find((x) => x.id === selected);
+    if (!box || !p) return closePet();
+    panel.classList.add("isDetail");
+    const g = guide?.[p.id] ?? {};
+    box.innerHTML = `
+      <button type="button" class="petBack">‹ All pets</button>
+      <div class="petDetailHead">
+        <img class="petPortrait petBig" alt="" />
+        <div class="pbItemText">
+          <div class="pbItemBoss"></div>
+          <div class="pbItemMeta petDetailRank"></div>
+          <div class="petBar"><div></div></div>
+        </div>
+      </div>
+      <div class="petCompass"></div>
+      <div class="petDetailSection petHow" hidden></div>
+      <div class="petDetailSection petDrops" hidden><div class="petsNearbyTitle">Souls drop from</div></div>
+      <div class="petMaps"></div>`;
+    box.querySelector(".petBack").addEventListener("click", closePet);
+    const img = box.querySelector(".petBig");
+    img.src = `./assets/pets/${p.id}.png`;
+    img.onerror = () => img.classList.add("isMissing");
+    box.querySelector(".pbItemBoss").textContent = p.name + (p.id === data.equipped ? " ★" : "");
+    box.querySelector(".petDetailRank").textContent = p.goal == null
+      ? `${p.family} · ${rankLabel(p)} · maxed`
+      : `${p.family} · ${rankLabel(p)} · ${p.souls}/${p.goal} souls${p.rank === 0 ? " to unlock" : ` to R${p.rank + 1}`} (${remaining(p)} to go)`;
+    box.querySelector(".petBar > div").style.width = p.goal == null ? "100%" : `${Math.min(100, (p.souls / p.goal) * 100)}%`;
+    if (g.how) {
+      const how = box.querySelector(".petHow");
+      how.hidden = false;
+      how.textContent = g.how;
+    }
+    if (g.drops?.length) {
+      const drops = box.querySelector(".petDrops");
+      drops.hidden = false;
+      for (const [name, region] of g.drops) {
+        const row = document.createElement("div");
+        row.className = "petDrop";
+        row.innerHTML = "<span></span><span class=\"petRegion\"></span>";
+        row.firstChild.textContent = name;
+        row.lastChild.textContent = region;
+        drops.appendChild(row);
+      }
+    }
+    for (const [region, url] of g.maps ?? []) {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "petMapBtn";
+      b.textContent = `Open ${region} map ↗`;
+      b.title = "Spawn map on aion2maps.com, in your browser";
+      b.addEventListener("click", () => window.javaBridge?.openBrowser?.(url));
+      box.querySelector(".petMaps").appendChild(b);
+    }
+    if (!g.drops?.length && !g.how) {
+      box.querySelector(".petHow").hidden = false;
+      box.querySelector(".petHow").textContent = "No known source for this pet's souls yet.";
+    }
+    renderCompass();
+  };
+
+  const renderCompass = () => {
+    const box = panel?.querySelector(".petCompass");
+    if (!box || selected == null) return;
+    const n = nearby.find((x) => x.petId === selected);
+    const farmable = !!guide?.[selected]?.drops?.length;
+    box.hidden = !n && !farmable;
+    if (!n) {
+      box.className = "petCompass isAway";
+      box.textContent = "None of its monsters are around you right now. Head to a zone below; an arrow shows here once they are in range.";
+      return;
+    }
+    box.className = "petCompass";
+    box.innerHTML = '<div class="petArrow petBigArrow"></div><div><div class="petBigDistance"></div><div class="pbItemMeta"></div></div>';
+    const arrow = box.querySelector(".petArrow");
+    if (n.bearing == null) {
+      arrow.textContent = "·";
+      box.querySelector(".petBigDistance").textContent = "In range";
+      box.querySelector(".pbItemMeta").textContent = "Use any skill to update your position and get the arrow.";
+    } else {
+      arrow.textContent = "↑";
+      arrow.style.transform = `rotate(${n.bearing}deg)`;
+      box.querySelector(".petBigDistance").textContent = `${metres(n.distance)} away`;
+      box.querySelector(".pbItemMeta").textContent = "Nearest one, as on your map (north is up). Use a skill now and then to keep it fresh.";
+    }
+  };
+
   const pollNearby = () =>
     invoke("get_pet_nearby")
       .then((list) => {
         nearby = Array.isArray(list) ? list : [];
-        renderNearby();
+        if (selected != null) renderCompass();
+        else renderNearby();
       })
       .catch(() => {});
 
@@ -152,6 +281,7 @@
     invoke("get_pets")
       .then((v) => {
         data = v;
+        if (selected != null) return renderDetail();
         render();
         renderNearby();
       })
@@ -175,7 +305,8 @@
         <input type="search" class="petsSearch" placeholder="Search pets or family…" spellcheck="false" />
         <div class="petsFilters" role="group"></div>
       </div>
-      <div class="pbPanelList petsList"></div>`;
+      <div class="pbPanelList petsList"></div>
+      <div class="pbPanelList petDetail"></div>`;
     const filters = panel.querySelector(".petsFilters");
     for (const [key, label] of FILTERS) {
       const b = document.createElement("button");
@@ -197,6 +328,12 @@
     });
     input.addEventListener("keydown", (e) => e.stopPropagation());
     panel.querySelector(".pbPanelClose").addEventListener("click", () => toggle(false));
+    panel.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && selected != null) {
+        e.stopPropagation();
+        closePet();
+      }
+    });
     meter.appendChild(panel);
     return panel;
   };

@@ -25,7 +25,7 @@ TooWholesome DPS Meter is a fork of [A2Tools DPS Meter](https://github.com/taeng
 The companion features sit in the strip under the title:
 - **Checklist.** Dailies, weeklies and event limits for each character. Where the game reports a count, the row fills itself and shows **auto**: entries and keys, Odyle Energy, Nightmare, Daily Dungeon, Ascension Trial, arena matches and wins, the duty board, and Command shop limits. Everything else you tick by hand. Rows clear at the daily (07:00 UTC) and weekly (Wednesday) reset, and stocks show when they'll be full.
 - **Events.** Countdowns to the Shugo Festival, Black Cloud Merchant, Spacetime Rift, Dimensional Invasion, Watcher Kaira, Artifact Siege and its bosses, Guardian Lord Nahma, and the resets. Times follow your region's server clock, daylight saving included, and you can turn on a chime and banner alert per event.
-- **Pets.** Your pet collection, read from the game's traffic with nothing to type in.
+- **Pets.** Your pet collection, read from the game's traffic with nothing to type in. Click a pet for where its souls drop and a live arrow to its monsters when they are near you.
   - Every pet's portrait, rank and souls toward the next rank, how many you've collected, and how far you are from the next collection reward.
   - A notice appears when a pet ranks up.
   - **Nearby** lists the pets you still need whose monsters are around you, nearest first, with a direction arrow and an approximate distance. These update for a couple of seconds after each skill you use.
@@ -91,7 +91,7 @@ GPL-3.0, the same as the upstream project. See [LICENSE](LICENSE). If you share 
 
 - Original work © taengu and A2Tools DPS Meter contributors. Some parser fixes come from [Daevalog](https://github.com/Seralth/Daevalog) by Seralth.
 - Checklist and Events: the task list, the checklist logic, the counter layouts and the event schedules come from [Nyerk](https://github.com/xCROv/aion2-nyerk) by xCROv (GPL-3.0).
-- Pet tracking: the pet-message layouts, the monster-to-pet table, the direction finding and the pet list come from [PetTracker](https://github.com/0Fox2Give/PetTracker) by 0Fox2Give (GPL-3.0). Pet names and portraits are AION 2 game material, © NCSOFT, shown to identify each pet.
+- Pet tracking: the pet-message layouts, the monster-to-pet table, the direction finding and the pet list come from [PetTracker](https://github.com/0Fox2Give/PetTracker) by 0Fox2Give (GPL-3.0). Which monsters drop each pet's souls, and in which zone, comes from PetTracker's snapshot of [aion2maps.com](https://aion2maps.com), which the pet page links to for spawn maps. Pet names and portraits are AION 2 game material, © NCSOFT, shown to identify each pet.
 - Cinzel font: SIL Open Font License 1.1 (`public/vendor/fonts/cinzel/LICENSE`). Other bundled fonts are listed in [README_UPSTREAM.md](README_UPSTREAM.md#fonts).
 
 TooWholesome DPS Meter is not affiliated with NCSoft or with A2Tools. AION 2 is a trademark of NCSoft.
