@@ -289,6 +289,13 @@ async fn send_to_discord(state: tauri::State<'_, AppState>, content: String) -> 
     }
 }
 
+/// TooWholesome DPS: your game server (1104 = Kaisinel, NA East), 0 until
+/// the game has said; the Timers pick their region from it.
+#[tauri::command]
+fn get_local_server(state: tauri::State<'_, AppState>) -> u16 {
+    state.data_storage.local_profile().server_id
+}
+
 /// TooWholesome DPS: copy text for the Share button.
 #[tauri::command]
 fn copy_text(text: String) -> Result<(), String> {
@@ -3043,6 +3050,7 @@ pub fn run() {
             crate::pets::get_pet_nearby,
             get_launch_with_game,
             copy_text,
+            get_local_server,
             set_discord_webhook,
             has_discord_webhook,
             send_to_discord,
