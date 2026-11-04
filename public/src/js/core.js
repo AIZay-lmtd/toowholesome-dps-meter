@@ -5316,10 +5316,10 @@ class DpsApp {
       if (targetEl?.closest?.(".resizeHandle")) {
         return;
       }
-      if (targetEl?.closest?.(".headerBtn, .footerBtn, .bossIcon")) {
+      if (targetEl?.closest?.(".headerBtn, .footerBtn, .bossIcon, .toolBtn")) {
         return;
       }
-      if (targetEl?.closest?.(".settingsPanel, .historyPanel, .detailsBody, .detailsSettingsMenu")) {
+      if (targetEl?.closest?.(".settingsPanel, .historyPanel, .detailsBody, .detailsSettingsMenu, .pbPanel, .shareMenu")) {
         return;
       }
       if (targetEl?.closest?.("button, input, select, textarea, a, [data-no-drag]")) {

@@ -1291,9 +1291,10 @@
     const target = e.target?.nodeType === Node.TEXT_NODE ? e.target.parentElement : e.target;
     // Let interactive elements handle their own clicks normally
     if (target?.closest?.("button, input, select, textarea, a, [data-no-drag]")) return;
-    if (target?.closest?.(".headerBtn, .footerBtn, .bossIcon, .resizeHandle")) return;
-    // Let panel internals work (close buttons, dropdowns, etc.)
-    if (target?.closest?.(".settingsPanel, .historyPanel, .detailsBody, .detailsHeader, .detailsSettingsMenu")) return;
+    if (target?.closest?.(".headerBtn, .footerBtn, .bossIcon, .resizeHandle, .toolBtn")) return;
+    // Let panel internals work (close buttons, dropdowns, etc.). TooWholesome DPS:
+    // the Pets, Events, Checklist and Bests panels and the Share menu too.
+    if (target?.closest?.(".settingsPanel, .historyPanel, .detailsBody, .detailsHeader, .detailsSettingsMenu, .pbPanel, .shareMenu")) return;
     // Let meter bar item clicks pass through for details/hover
     if (target?.closest?.(".item")) return;
     // Everything else in .meter: native drag
