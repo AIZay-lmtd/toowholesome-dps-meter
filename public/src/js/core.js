@@ -5515,10 +5515,12 @@ class DpsApp {
     if (!this.lockBtn || this.lockBtn.style.display === "none") return;
     const selectors = [
       ".header .headerBtns",
+      ".toolStrip",
       ".shareMenu:not([hidden])",
       ".pbPanel:not([hidden])",
       ".petsPanel:not([hidden])",
       ".timersPanel:not([hidden])",
+      ".checklistPanel:not([hidden])",
       ".settingsPanel.isOpen",
       ".historyPanel.isOpen",
       ".historyPanel.open",

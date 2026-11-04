@@ -78,12 +78,19 @@ To stop this, turn the setting off. Uninstalling the meter also removes it.
 | ⏻ Power | **Close** the meter |
 | 🔗 Share | **Send to Discord** (posts the table to your party's channel), or copy the table or a short line to paste anywhere. The first time, it asks for a Discord webhook link: in Discord, open channel settings → Integrations → Webhooks → New Webhook → Copy Webhook URL. |
 | 🔒 Lock | Click-through: your clicks go to the game behind the meter. The header buttons still work, and clicking the lock again unlocks it. |
-| 🐾 Paw | **Pets:** your collection, read from the game automatically. Start the meter before you log in so it catches your collection. |
-| 🏆 Trophy | Your **personal bests**, one per boss, tier and class |
 | 📜 Scroll | **Battle history.** Boss fights are saved automatically. Click one for full details |
 | ↺ Reset | Clear the current fight |
 | ⚙ Gear | Settings: theme, opacity, target mode, hotkeys, language… |
 | 📷 Camera | Copy a screenshot of the meter to the clipboard (paste it into Discord) |
+
+**The strip under the title:**
+
+| Button | What it does |
+|---|---|
+| Checklist | Dailies and weeklies for each character. Rows marked **auto** fill themselves from the game; tick the rest yourself. Counts clear at the daily and weekly reset. |
+| Events | Countdowns to Shugo Festival, rifts, invasions, sieges, field bosses and the resets. Click a bell to get a chime and a banner before an event starts. Set your region at the top if it isn't picked up automatically. |
+| Pets | Your pet collection, read from the game: ranks, souls and portraits. **Nearby** shows pets you still need around you, with an arrow and distance; use any skill to update it. Start the meter before you log in so it catches your collection. |
+| Bests | Your **personal bests**, one per boss, tier and class |
 
 - **Click a player row** to open the skill breakdown: crits, back attacks, DoTs, buff timeline and more.
 - **Personal bests:**

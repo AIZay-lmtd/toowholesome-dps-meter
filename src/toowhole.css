@@ -596,3 +596,32 @@
 .timerBell { border: 0; background: none; cursor: pointer; font-size: 14px; padding: 2px; opacity: 0.85; }
 .timerBell[aria-pressed="false"] { opacity: 0.3; filter: grayscale(1); }
 .timerBell:hover { opacity: 1; }
+
+/* Checklist (every theme). */
+.meter.checklistOpen { min-height: 500px; }
+.checklistPanel { width: min(390px, calc(100% - 12px)); max-height: 470px; }
+.checklistWho { padding: 6px 10px 2px; font-size: 11px; color: rgba(243, 216, 154, 0.75); }
+.checklistBar { display: flex; align-items: center; gap: 10px; padding: 6px 10px; border-bottom: 1px solid rgba(232, 196, 106, 0.18); font-size: 11px; color: rgba(243, 216, 154, 0.8); }
+.checklistBar .checklistTabs { flex: 1; }
+.checklistGroup { display: block; width: 100%; margin-top: 4px; padding: 4px 6px; border: 0; background: none; text-align: left; cursor: pointer; font-family: var(--tw-serif); font-weight: 700; font-size: 11px; letter-spacing: 0.06em; color: var(--pb-gold); }
+.checklistRow { display: flex; align-items: center; gap: 8px; padding: 5px 6px; border-bottom: 1px solid rgba(232, 196, 106, 0.08); }
+.checklistRow.isDone { opacity: 0.45; }
+.checklistRow.isFull .checklistBank { border-color: var(--pb-behind); }
+.checklistAuto { margin-left: 6px; padding: 0 5px; border-radius: 8px; font-size: 9.5px; font-weight: 600; color: #10241a; background: var(--pb-ahead); vertical-align: middle; }
+.checklistControl { display: flex; align-items: center; gap: 4px; flex: 0 0 auto; }
+.checklistControl button { width: 20px; height: 20px; padding: 0; border: 1px solid rgba(232, 196, 106, 0.35); border-radius: 3px; background: rgba(232, 196, 106, 0.08); color: #f3d89a; cursor: pointer; font: inherit; line-height: 1; }
+.checklistControl button:disabled { opacity: 0.3; cursor: default; }
+.checklistValue { min-width: 34px; text-align: center; font-family: var(--hud-tech); font-size: 12px; font-variant-numeric: tabular-nums; color: #fff4d6; }
+.checklistBank { width: 46px; padding: 2px 4px; border: 1px solid rgba(232, 196, 106, 0.35); border-radius: 3px; background: rgba(0, 0, 0, 0.4); color: #f6efe0; font: inherit; font-size: 11.5px; text-align: right; }
+.checklistControl input[type="checkbox"] { width: 16px; height: 16px; accent-color: #e8c46a; }
+
+/* The companion strip under the title (every theme). */
+.toolStrip { display: flex; gap: 2px; padding: 2px 8px 3px; }
+.toolStrip .toolBtn {
+  display: flex; align-items: center; gap: 4px; padding: 2px 7px; border-radius: 3px; cursor: pointer;
+  font-size: 10.5px; color: rgba(232, 196, 106, 0.7); transition: color 120ms ease, background 120ms ease;
+}
+.toolStrip .toolBtn svg { width: 12px; height: 12px; }
+.toolStrip .toolBtn:hover { color: #fff1c4; background: rgba(232, 196, 106, 0.1); }
+.meter.slim .toolStrip { padding: 1px 6px 2px; }
+.meter.slim .toolStrip .toolBtn span { display: none; }

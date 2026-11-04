@@ -3,6 +3,7 @@ pub mod abnormal;
 pub mod captured_payload;
 pub mod evidence_slice;
 pub mod framing;
+pub mod game_counters;
 pub mod packet_accumulator;
 pub mod pet_nav;
 pub mod pet_wire;

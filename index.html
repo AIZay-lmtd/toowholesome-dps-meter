@@ -62,13 +62,17 @@
             <div class="headerBtn lockBtn" style="display:none" role="button" tabindex="0" aria-label="Lock overlay (click-through)" data-i18n-aria-label="settings.showLockBtn"><i data-lucide="lock-open"></i></div>
             <div class="headerBtn shareBtn" role="button" tabindex="0" aria-label="Share damage" title="Share damage"><i data-lucide="share-2"></i></div>
             <div class="headerBtn suspendBtn" style="display:none" role="button" tabindex="0" aria-label="Close the meter" title="Close the meter"><i data-lucide="power"></i></div>
-            <div class="headerBtn timersBtn" role="button" tabindex="0" aria-label="World and events" title="World &amp; Events"><i data-lucide="alarm-clock"></i></div>
-            <div class="headerBtn petsBtn" role="button" tabindex="0" aria-label="Pets" title="Pets"><i data-lucide="paw-print"></i></div>
-            <div class="headerBtn pbBtn" role="button" tabindex="0" aria-label="Personal bests" title="Personal bests"><i data-lucide="trophy"></i></div>
             <div class="headerBtn historyBtn" role="button" tabindex="0" aria-label="Fight history" data-i18n-aria-label="history.title"><i data-lucide="scroll-text"></i></div>
             <div class="headerBtn resetBtn"><i data-lucide="rotate-ccw"></i></div>
             <div class="headerBtn settingsBtn"><i data-lucide="settings"></i></div>
           </div>
+        </div>
+        <!-- TooWholesome DPS: the companion features, kept out of the header so the boss name has room. -->
+        <div class="toolStrip">
+          <div class="toolBtn checklistBtn" role="button" tabindex="0" title="Dailies and weeklies"><i data-lucide="list-checks"></i><span>Checklist</span></div>
+          <div class="toolBtn timersBtn" role="button" tabindex="0" title="World &amp; Events timers"><i data-lucide="alarm-clock"></i><span>Events</span></div>
+          <div class="toolBtn petsBtn" role="button" tabindex="0" title="Pet collection"><i data-lucide="paw-print"></i><span>Pets</span></div>
+          <div class="toolBtn pbBtn" role="button" tabindex="0" title="Personal bests"><i data-lucide="trophy"></i><span>Bests</span></div>
         </div>
         <div class="bossHpBar" style="display:none">
           <div class="bossHpFill"></div>
@@ -1283,5 +1287,8 @@
     <script src="/src/js/pets.js"></script>
     <script src="/src/js/timerSchedule.js"></script>
     <script src="/src/js/timers.js"></script>
+    <script src="/src/js/taskList.js"></script>
+    <script src="/src/js/taskLogic.js"></script>
+    <script src="/src/js/checklist.js"></script>
   </body>
 </html>

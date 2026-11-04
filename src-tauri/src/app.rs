@@ -2507,6 +2507,7 @@ pub fn run() {
                 .unwrap_or_else(|_| std::path::PathBuf::from("."));
             let _ = std::fs::create_dir_all(&app_data_dir);
             crate::pets::init(app_data_dir.clone(), app.handle().clone());
+            crate::checklist::init(app_data_dir.clone(), app.handle().clone());
 
             // Load resources — try multiple paths (dev vs production)
             let skill_lookup = SkillLookup::new();
@@ -3048,6 +3049,7 @@ pub fn run() {
             get_personal_bests,
             crate::pets::get_pets,
             crate::pets::get_pet_nearby,
+            crate::checklist::get_checklist_game,
             get_launch_with_game,
             copy_text,
             get_local_server,

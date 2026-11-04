@@ -49,6 +49,8 @@ mod autostart;
 mod clipboard_text;
 #[cfg(feature = "desktop")]
 mod pets;
+#[cfg(feature = "desktop")]
+mod checklist;
 
 #[cfg(feature = "desktop")]
 mod atomic_file;

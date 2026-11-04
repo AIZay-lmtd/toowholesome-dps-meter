@@ -277,6 +277,11 @@ impl StreamProcessor {
                 let local = self.data_storage.local_player_id().unwrap_or(0) as i32;
                 crate::pets::nav_frame(local, packet[h], packet[h + 1], &packet[h + 2..]);
             }
+            // TooWholesome DPS: the checklist's counters (see `capture::game_counters`).
+            if let Some(counter) = super::game_counters::decode(packet) {
+                let me = self.data_storage.local_profile();
+                crate::checklist::observe(counter, me.name, me.server_id);
+            }
         }
 
         let parsed_damage = self.parsing_damage(packet, true, false);
