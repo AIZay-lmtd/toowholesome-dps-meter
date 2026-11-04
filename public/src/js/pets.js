@@ -19,6 +19,8 @@
   ];
 
   let data = null;
+  let nearby = [];
+  let nearbyTimer = 0;
   let filter = "todo";
   let search = "";
   let panel;
@@ -93,11 +95,65 @@
     }
   };
 
+  // shortcut: assumes the game's units are Unreal centimetres (unverified); recalibrate if distances look off.
+  const metres = (units) => `≈${Math.max(1, Math.round(units / 100))} m`;
+
+  // Pets you still need whose monsters are around you, nearest first.
+  const renderNearby = () => {
+    const box = panel?.querySelector(".petsNearby");
+    if (!box || !data) return;
+    const byId = new Map(data.pets.map((p) => [p.id, p]));
+    const needed = nearby.filter((n) => !(byId.get(n.petId)?.rank >= 3)).slice(0, 6);
+    box.hidden = needed.length === 0;
+    box.textContent = "";
+    if (!needed.length) return;
+    const title = document.createElement("div");
+    title.className = "petsNearbyTitle";
+    title.textContent = "Nearby";
+    box.appendChild(title);
+    for (const n of needed) {
+      const p = byId.get(n.petId);
+      const row = document.createElement("div");
+      row.className = "petNearby";
+      const img = document.createElement("img");
+      img.className = "petPortrait";
+      img.alt = "";
+      img.src = `./assets/pets/${n.petId}.png`;
+      img.onerror = () => img.classList.add("isMissing");
+      const name = document.createElement("div");
+      name.className = "pbItemBoss";
+      name.textContent = p?.name ?? `Pet #${n.petId}`;
+      const arrow = document.createElement("div");
+      arrow.className = "petArrow";
+      if (n.bearing == null) {
+        arrow.textContent = "·";
+        arrow.title = "Use a skill to update your position";
+      } else {
+        arrow.textContent = "↑";
+        arrow.style.transform = `rotate(${n.bearing}deg)`;
+      }
+      const dist = document.createElement("div");
+      dist.className = "petDistance";
+      dist.textContent = n.distance == null ? "nearby" : metres(n.distance);
+      row.append(img, name, arrow, dist);
+      box.appendChild(row);
+    }
+  };
+
+  const pollNearby = () =>
+    invoke("get_pet_nearby")
+      .then((list) => {
+        nearby = Array.isArray(list) ? list : [];
+        renderNearby();
+      })
+      .catch(() => {});
+
   const load = () =>
     invoke("get_pets")
       .then((v) => {
         data = v;
         render();
+        renderNearby();
       })
       .catch(() => {});
 
@@ -114,6 +170,7 @@
         <button type="button" class="pbPanelClose" aria-label="Close">✕</button>
       </div>
       <div class="petsSummary"></div>
+      <div class="petsNearby" hidden></div>
       <div class="petsControls">
         <input type="search" class="petsSearch" placeholder="Search pets or family…" spellcheck="false" />
         <div class="petsFilters" role="group"></div>
@@ -150,6 +207,8 @@
     const show = typeof force === "boolean" ? force : p.hidden;
     if (show) load();
     p.hidden = !show;
+    clearInterval(nearbyTimer);
+    if (show) nearbyTimer = setInterval(pollNearby, 500);
     // Class changes re-fit the overlay window (tauriBridge) and the lock's click area (core.js).
     p.classList.toggle("isOpen", show);
     document.querySelector(".meter")?.classList.toggle("petsOpen", show);

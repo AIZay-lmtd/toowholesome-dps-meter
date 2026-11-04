@@ -13,6 +13,7 @@ use parking_lot::Mutex;
 use serde::{Deserialize, Serialize};
 use tauri::Emitter;
 
+use crate::capture::pet_nav::{Nearby, PetNav};
 use crate::capture::pet_wire::{goal, PetEvent};
 
 #[derive(Deserialize)]
@@ -24,6 +25,27 @@ struct CatalogEntry {
 
 static CATALOG: LazyLock<Vec<CatalogEntry>> =
     LazyLock::new(|| serde_json::from_str(include_str!("../../src/data/pets.json")).unwrap_or_default());
+
+/// Monster npc code -> the pet whose souls it drops (from PetTracker's sources).
+static PET_SOURCES: LazyLock<HashMap<i32, i32>> = LazyLock::new(|| {
+    serde_json::from_str::<HashMap<String, i32>>(include_str!("../../src/data/pet_sources.json"))
+        .unwrap_or_default()
+        .into_iter()
+        .filter_map(|(npc, pet)| Some((npc.parse().ok()?, pet)))
+        .collect()
+});
+
+static NAV: LazyLock<Mutex<PetNav>> = LazyLock::new(|| Mutex::new(PetNav::default()));
+
+pub fn nav_frame(local: i32, op: u8, family: u8, body: &[u8]) {
+    NAV.lock().frame(local, op, family, body, crate::clock::now_ms(), |npc| PET_SOURCES.get(&npc).copied());
+}
+
+/// Pets whose monsters are around you, nearest first, with a direction when known.
+#[tauri::command]
+pub fn get_pet_nearby() -> Vec<Nearby> {
+    NAV.lock().nearby(crate::clock::now_ms())
+}
 
 pub fn is_pet(id: i32) -> bool {
     CATALOG.iter().any(|p| p.id == id)
@@ -149,5 +171,7 @@ mod tests {
     fn the_pet_list_loads() {
         assert!(super::CATALOG.len() >= 300);
         assert!(super::is_pet(1001) && !super::is_pet(42));
+        assert!(super::PET_SOURCES.len() > 400);
+        assert!(super::PET_SOURCES.values().all(|&p| super::is_pet(p)));
     }
 }

@@ -4,6 +4,7 @@ pub mod captured_payload;
 pub mod evidence_slice;
 pub mod framing;
 pub mod packet_accumulator;
+pub mod pet_nav;
 pub mod pet_wire;
 pub mod stream_assembler;
 pub mod stream_processor;

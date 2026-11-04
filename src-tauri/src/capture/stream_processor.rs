@@ -264,11 +264,18 @@ impl StreamProcessor {
         // Buffs, debuffs and stats, recorded alongside (see `capture::abnormal`).
         self.data_storage.note_abnormal_packet(packet);
 
-        // TooWholesome DPS: the pet collection (see `capture::pet_wire`).
+        // TooWholesome DPS: the pet collection (see `capture::pet_wire`) and
+        // where the monsters that drop pet souls are (`capture::pet_nav`).
         #[cfg(feature = "desktop")]
         if packet.len() > 3 {
             for event in super::pet_wire::decode(packet, crate::pets::is_pet) {
                 crate::pets::apply(event, self.data_storage.local_profile().name);
+            }
+            let header = read_varint(packet, 0).length;
+            if header > 0 && packet.len() >= header as usize + 2 {
+                let h = header as usize;
+                let local = self.data_storage.local_player_id().unwrap_or(0) as i32;
+                crate::pets::nav_frame(local, packet[h], packet[h + 1], &packet[h + 2..]);
             }
         }
 

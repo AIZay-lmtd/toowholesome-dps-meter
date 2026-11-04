@@ -3040,6 +3040,7 @@ pub fn run() {
             get_fight_history,
             get_personal_bests,
             crate::pets::get_pets,
+            crate::pets::get_pet_nearby,
             get_launch_with_game,
             copy_text,
             set_discord_webhook,
