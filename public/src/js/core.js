@@ -5517,6 +5517,7 @@ class DpsApp {
       ".header .headerBtns",
       ".shareMenu:not([hidden])",
       ".pbPanel:not([hidden])",
+      ".petsPanel:not([hidden])",
       ".settingsPanel.isOpen",
       ".historyPanel.isOpen",
       ".historyPanel.open",

@@ -78,6 +78,7 @@ To stop this, turn the setting off. Uninstalling the meter also removes it.
 | ⏻ Power | **Close** the meter |
 | 🔗 Share | **Send to Discord** (posts the table to your party's channel), or copy the table or a short line to paste anywhere. The first time, it asks for a Discord webhook link: in Discord, open channel settings → Integrations → Webhooks → New Webhook → Copy Webhook URL. |
 | 🔒 Lock | Click-through: your clicks go to the game behind the meter. The header buttons still work, and clicking the lock again unlocks it. |
+| 🐾 Paw | **Pets:** your collection, read from the game automatically. Start the meter before you log in so it catches your collection. |
 | 🏆 Trophy | Your **personal bests**, one per boss, tier and class |
 | 📜 Scroll | **Battle history.** Boss fights are saved automatically. Click one for full details |
 | ↺ Reset | Clear the current fight |

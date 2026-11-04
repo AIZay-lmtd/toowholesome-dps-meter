@@ -2499,6 +2499,7 @@ pub fn run() {
             let app_data_dir = app.path().app_data_dir()
                 .unwrap_or_else(|_| std::path::PathBuf::from("."));
             let _ = std::fs::create_dir_all(&app_data_dir);
+            crate::pets::init(app_data_dir.clone(), app.handle().clone());
 
             // Load resources — try multiple paths (dev vs production)
             let skill_lookup = SkillLookup::new();
@@ -3038,6 +3039,7 @@ pub fn run() {
             get_fight_buffs,
             get_fight_history,
             get_personal_bests,
+            crate::pets::get_pets,
             get_launch_with_game,
             copy_text,
             set_discord_webhook,

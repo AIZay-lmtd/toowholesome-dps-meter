@@ -47,6 +47,8 @@ mod app;
 mod autostart;
 #[cfg(feature = "desktop")]
 mod clipboard_text;
+#[cfg(feature = "desktop")]
+mod pets;
 
 #[cfg(feature = "desktop")]
 mod atomic_file;

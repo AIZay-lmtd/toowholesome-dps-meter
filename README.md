@@ -22,6 +22,7 @@ TooWholesome DPS Meter is a fork of [A2Tools DPS Meter](https://github.com/taeng
   - The overlay appears when the AION 2 window opens and hides about 10 seconds after the game closes.
   - It uses a Windows Task Scheduler task named "TooWholesome DPS Meter", which is removed when you turn the setting off or uninstall. Turning it on or off asks for Windows permission once.
   - Opening the meter a second time brings up the copy that's already running instead of starting another one.
+- **Pet tracker (🐾).** It reads your pet collection from the game's traffic, with nothing to type in. You see every pet's rank and souls toward the next rank, how many you've collected, and how far you are from the next collection reward. A notice appears when a pet ranks up. The collection is read when you log in or change zones, so start the meter before you play.
 - **Share button.** **Send to Discord** posts the fight's table to your party's channel through a webhook you set up once. You can also copy the table or a short line. AION 2's chat doesn't accept a paste, and the meter never types into the game for you (see [docs/MODDING-ROADMAP.md](docs/MODDING-ROADMAP.md)).
 - **Lock (click-through)** lets clicks pass through to the game while every header button stays usable.
 - **Close button.** The power button in the header closes the meter. Hide it in Settings if you don't want it.
@@ -81,6 +82,7 @@ See **[docs/MODDING-ROADMAP.md](docs/MODDING-ROADMAP.md)**: what can safely be b
 GPL-3.0, the same as the upstream project. See [LICENSE](LICENSE). If you share the app, you must also offer its source code, for example by publishing this repository.
 
 - Original work © taengu and A2Tools DPS Meter contributors. Some parser fixes come from [Daevalog](https://github.com/Seralth/Daevalog) by Seralth.
+- Pet tracking: the pet-message layouts and the pet list come from [PetTracker](https://github.com/0Fox2Give/PetTracker) by 0Fox2Give (GPL-3.0). Pet names and portraits are AION 2 game material, © NCSOFT, shown to identify each pet.
 - Cinzel font: SIL Open Font License 1.1 (`public/vendor/fonts/cinzel/LICENSE`). Other bundled fonts are listed in [README_UPSTREAM.md](README_UPSTREAM.md#fonts).
 
 TooWholesome DPS Meter is not affiliated with NCSoft or with A2Tools. AION 2 is a trademark of NCSoft.
